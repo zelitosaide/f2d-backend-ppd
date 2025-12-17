@@ -4,6 +4,7 @@ import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Restaurant } from "./entities/restaurant.entity";
+import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 
 @Injectable()
 export class RestaurantsService {
@@ -17,8 +18,12 @@ export class RestaurantsService {
     return this.restaurantRepository.save(restaurant);
   }
 
-  findAll() {
-    return `This action returns all restaurants`;
+  findAll(paginationQuery: PaginationQueryDto): Promise<Restaurant[]> {
+    const { limit, offset } = paginationQuery;
+    return this.restaurantRepository.find({
+      skip: offset,
+      take: limit,
+    });
   }
 
   findOne(id: number) {

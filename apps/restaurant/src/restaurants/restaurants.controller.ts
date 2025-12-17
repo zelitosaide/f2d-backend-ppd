@@ -1,8 +1,9 @@
-import { Controller, Get, Post } from "@nestjs/common";
+import { Controller, Get, Post, Query } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
+import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 
 @Controller("restaurants")
 export class RestaurantsController {
@@ -14,8 +15,8 @@ export class RestaurantsController {
   }
 
   @Get()
-  findAll() {
-    return this.restaurantsService.findAll();
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.restaurantsService.findAll(paginationQuery);
   }
 
   @MessagePattern("findOneRestaurant")
