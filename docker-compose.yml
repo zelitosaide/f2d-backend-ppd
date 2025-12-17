@@ -1,0 +1,166 @@
+services:
+  order:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=order
+    command: npm run start:dev -- order
+    ports:
+      - 3001:3001
+    environment:
+      - POSTGRES_HOST=order-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=orders
+      - NATS_URL=nats://nats:4222
+    volumes:
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./apps/order:/usr/src/app/apps/order
+    depends_on:
+      - order-db
+      - nats
+  order-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=orders
+  restaurant:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=restaurant
+    command: npm run start:dev -- restaurant
+    ports:
+      - 3003:3003
+    environment:
+      - POSTGRES_HOST=restaurant-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=restaurants
+    volumes:
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./apps/restaurant:/usr/src/app/apps/restaurant
+    depends_on:
+      - restaurant-db
+      - order
+  restaurant-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=restaurants
+  # User and Auth services would go here
+  user:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=user
+    command: npm run start:dev -- user
+    ports:
+      - 3004:3004
+    environment:
+      - POSTGRES_HOST=user-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+    volumes:
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./apps/user:/usr/src/app/apps/user
+    depends_on:
+      - user-db
+  user-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+
+  auth:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=auth
+    command: npm run start:dev -- auth
+    ports:
+      - 3000:3000
+    environment:
+      - POSTGRES_HOST=auth-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=auth
+    volumes:
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./apps/auth:/usr/src/app/apps/auth
+    depends_on:
+      - auth-db
+  auth-db:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=auth
+
+  # Payment service
+  payment:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=payment
+    command: npm run start:dev -- payment
+    ports:
+      - 3002:3002
+    environment:
+      - POSTGRES_HOST=payment-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=payments
+      - NATS_URL=nats://nats:4222
+    volumes:
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./apps/payment:/usr/src/app/apps/payment
+    depends_on:
+      - nats
+      - order
+  # # Reporting service
+  # f2d-reporting:
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #     args:
+  #       - APP_NAME=f2d-reporting
+  #   command: npm run start:dev -- f2d-reporting
+  #   ports:
+  #     - 3003:3003
+  #   volumes:
+  #     - ./libs:/usr/src/app/libs
+  #     - ./package.json:/usr/src/app/package.json
+  #     - ./tsconfig.json:/usr/src/app/tsconfig.json
+  #     - ./apps/f2d-reporting:/usr/src/app/apps/f2d-reporting
+  #   depends_on:
+  #     - order
+  #     - payment
+  #     - user
+  #     - restaurant
+  nats:
+    image: nats:2.12.1-alpine
