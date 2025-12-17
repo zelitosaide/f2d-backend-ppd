@@ -1,19 +1,19 @@
-import { Controller } from "@nestjs/common";
+import { Controller, Get, Post } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
 
-@Controller()
+@Controller("restaurants")
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
-  @MessagePattern("createRestaurant")
+  @Post()
   create(@Payload() createRestaurantDto: CreateRestaurantDto) {
     return this.restaurantsService.create(createRestaurantDto);
   }
 
-  @MessagePattern("findAllRestaurants")
+  @Get()
   findAll() {
     return this.restaurantsService.findAll();
   }
