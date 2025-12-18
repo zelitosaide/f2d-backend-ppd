@@ -14,6 +14,8 @@ docker compose up
 
 ```bash
 https://learn.nestjs.com/courses/microservices/lectures/51602002 -> Next
+
+Server setup next: https://www.youtube.com/watch?v=w5E7ER6Eo2Y&list=PLdHg5T0SNpN38gy5xZ0PVEaDdZXlPkgP9&index=10
 ```
 
 ## Server Setup
@@ -31,4 +33,8 @@ sudo apt update && sudo apt install -y \
   iproute2
 
 sudo apt update && sudo apt upgrade
+```
+
+```bash
+ssh -lroot -p22 109.205.183.229
 ```

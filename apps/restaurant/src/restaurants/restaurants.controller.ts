@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from "@nestjs/common";
+import { Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
@@ -19,8 +19,8 @@ export class RestaurantsController {
     return this.restaurantsService.findAll(paginationQuery);
   }
 
-  @MessagePattern("findOneRestaurant")
-  findOne(@Payload() id: number) {
+  @Get(":id")
+  findOne(@Param("id") id: number) {
     return this.restaurantsService.findOne(id);
   }
 
