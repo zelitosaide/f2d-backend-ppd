@@ -1,4 +1,7 @@
+import { Type } from "class-transformer";
 import { IsEmail, IsOptional, IsString, IsUrl } from "class-validator";
+import { Menu } from "./menu.dto";
+import { Address } from "./address.dto";
 
 export class CreateRestaurantDto {
   @IsString()
@@ -25,6 +28,14 @@ export class CreateRestaurantDto {
 
   @IsString()
   readonly phone_number: string;
+
+  @IsOptional()
+  @Type(() => Menu)
+  readonly menus: Menu[];
+
+  @IsOptional()
+  @Type(() => Address)
+  readonly address: Address;
 
   @IsOptional()
   @IsString()

@@ -24,12 +24,24 @@ export class RestaurantsService {
       order: { created_at: "DESC" },
       skip: offset,
       take: limit,
+      relations: {
+        address: true,
+        menus: {
+          dishes: true,
+        },
+      },
     });
   }
 
   async findOne(id: number) {
     const restaurant = await this.restaurantRepository.findOne({
       where: { id },
+      relations: {
+        address: true,
+        menus: {
+          dishes: true,
+        },
+      },
     });
     if (!restaurant) {
       throw new NotFoundException(`Restaurant with ID ${id} not found`);

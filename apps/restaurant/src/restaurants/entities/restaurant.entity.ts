@@ -2,9 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Menu } from "./menu.entity";
+import { Address } from "./address.entity";
 
 @Entity()
 export class Restaurant {
@@ -32,11 +37,18 @@ export class Restaurant {
   @Column({ nullable: true })
   phone_number: string;
 
+  @OneToMany(() => Menu, (menu) => menu.restaurant, { cascade: true })
+  menus: Menu[];
+
   @Column({ nullable: true })
   opening_time: string;
 
   @Column({ nullable: true })
   closing_time: string;
+
+  @OneToOne(() => Address, { cascade: true })
+  @JoinColumn()
+  address: Address;
 
   @CreateDateColumn()
   created_at: Date;
