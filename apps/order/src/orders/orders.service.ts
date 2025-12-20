@@ -32,7 +32,7 @@ export class OrdersService {
     return `This action removes a #${id} order`;
   }
 
-  createOrderFromCart(orderPayload: { userId: number }) {
+  createOrderFromCart(orderPayload: { id: number }) {
     this.processPayment();
   }
 
