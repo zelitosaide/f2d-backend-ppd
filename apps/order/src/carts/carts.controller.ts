@@ -9,17 +9,17 @@ import {
   Query,
 } from "@nestjs/common";
 import { CartsService } from "./carts.service";
-import { CreateCartDto } from "./dto/create-cart.dto";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
 import { UpdateItemQuantityDto } from "./dto/update-item-quantity-dto";
+import { CartItemDto } from "./dto/cart-item-dto";
 
 @Controller("carts")
 export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartsService.create(createCartDto);
+  @Post(":userId/items/add")
+  addItem(@Param("userId") userId: number, @Body() cartItem: CartItemDto) {
+    return this.cartsService.addItem(userId, cartItem);
   }
 
   @Delete(":id/items/:itemId")

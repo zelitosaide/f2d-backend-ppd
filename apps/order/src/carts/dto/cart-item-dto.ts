@@ -1,6 +1,6 @@
 import { IsInt, IsNumber } from "class-validator";
 
-export class CartItem {
+export class CartItemDto {
   @IsInt()
   readonly restaurant_id: number;
 
