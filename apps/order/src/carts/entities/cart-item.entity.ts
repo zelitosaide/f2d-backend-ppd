@@ -12,13 +12,13 @@ export class CartItem {
   @Column()
   dish_id: number;
 
-  @Column({ nullable: true })
+  @Column()
   dish_name: string;
 
-  @Column({ nullable: true })
+  @Column()
   dish_description: string;
 
-  @Column({ nullable: true })
+  @Column()
   dish_image_url: string;
 
   @Column()
