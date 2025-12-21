@@ -55,8 +55,8 @@ export class CartsController {
     return this.cartsService.findAll(paginationQuery);
   }
 
-  @Get(":id")
-  findOne(@Param("id") id: number) {
-    return this.cartsService.findOne(id);
+  @Get(":userId")
+  findOne(@Param("userId") userId: number) {
+    return this.cartsService.findOne(userId);
   }
 }

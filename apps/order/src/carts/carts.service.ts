@@ -96,13 +96,13 @@ export class CartsService {
     });
   }
 
-  async findOne(id: number): Promise<Cart> {
+  async findOne(userId: number): Promise<Cart> {
     const cart = await this.cartsRepository.findOne({
-      where: { id },
+      where: { user_id: userId },
       relations: { items: true },
     });
     if (!cart) {
-      throw new NotFoundException(`Cart with ID ${id} not found`);
+      throw new NotFoundException(`Cart with userID ${userId} not found`);
     }
     return cart;
   }
