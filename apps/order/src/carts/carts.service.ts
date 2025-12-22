@@ -28,7 +28,9 @@ export class CartsService {
         user_id: userId,
         items: [cartItem],
       });
-      return this.cartsRepository.save(newCart);
+      const savedCart = await this.cartsRepository.save(newCart);
+      savedCart.items.sort((a, b) => a.id - b.id);
+      return savedCart;
     }
     const existingItem = cart.items.find(
       (item) => item.dish_id === cartItem.dish_id,
@@ -36,13 +38,13 @@ export class CartsService {
     if (existingItem) {
       existingItem.quantity += cartItem.quantity;
       await this.cartItemsRepository.save(existingItem);
-      return this.cartsRepository.save(cart);
     } else {
       const newItem = this.cartItemsRepository.create(cartItem);
       cart.items.push(newItem);
       await this.cartItemsRepository.save(newItem);
-      return this.cartsRepository.save(cart);
     }
+    cart.items.sort((a, b) => a.id - b.id);
+    return this.cartsRepository.save(cart);
   }
 
   async deleteItem(cartId: number, itemId: number): Promise<void> {
