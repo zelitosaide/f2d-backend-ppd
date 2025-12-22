@@ -14,7 +14,7 @@ export class CartsService {
     @InjectRepository(Cart)
     private readonly cartsRepository: Repository<Cart>,
     @InjectRepository(CartItem)
-    private readonly cartItemRepository: Repository<CartItem>,
+    private readonly cartItemsRepository: Repository<CartItem>,
     private readonly ordersService: OrdersService,
   ) {}
 
@@ -35,12 +35,12 @@ export class CartsService {
     );
     if (existingItem) {
       existingItem.quantity += cartItem.quantity;
-      await this.cartItemRepository.save(existingItem);
+      await this.cartItemsRepository.save(existingItem);
       return this.cartsRepository.save(cart);
     } else {
-      const newItem = this.cartItemRepository.create(cartItem);
+      const newItem = this.cartItemsRepository.create(cartItem);
       cart.items.push(newItem);
-      await this.cartItemRepository.save(newItem);
+      await this.cartItemsRepository.save(newItem);
       return this.cartsRepository.save(cart);
     }
   }
@@ -60,7 +60,7 @@ export class CartsService {
   async updateItemQuantity(
     cartId: number,
     itemId: number,
-    updateItemQuantity: UpdateItemQuantityDto,
+    updateItemQuantityDto: UpdateItemQuantityDto,
   ): Promise<Cart> {
     const cart = await this.cartsRepository.findOne({
       where: { id: cartId },
@@ -71,10 +71,23 @@ export class CartsService {
     }
     const item = cart.items.find((item) => item.dish_id === itemId);
     if (!item) {
-      throw new NotFoundException(`Item with ID ${itemId} not found in cart`);
+      throw new NotFoundException(
+        `Item with dish ID ${itemId} not found in cart`,
+      );
     }
-    item.quantity += updateItemQuantity.quantity;
-    return this.cartsRepository.save(cart);
+
+    const newQuantity = item.quantity + updateItemQuantityDto.quantity;
+
+    if (newQuantity <= 0) {
+      await this.cartItemsRepository.delete(item.id);
+      cart.items = cart.items.filter((i) => i.id !== item.id);
+      return cart;
+    }
+
+    item.quantity = newQuantity;
+    await this.cartItemsRepository.save(item);
+    cart.items.sort((a, b) => a.id - b.id);
+    return cart;
   }
 
   async checkout(id: number) {
