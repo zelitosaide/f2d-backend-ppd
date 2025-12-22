@@ -81,6 +81,7 @@ export class CartsService {
     if (newQuantity <= 0) {
       await this.cartItemsRepository.delete(item.id);
       cart.items = cart.items.filter((i) => i.id !== item.id);
+      cart.items.sort((a, b) => a.id - b.id);
       return cart;
     }
 
