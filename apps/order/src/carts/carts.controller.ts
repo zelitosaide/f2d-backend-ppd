@@ -22,20 +22,20 @@ export class CartsController {
     return this.cartsService.addItem(userId, cartItem);
   }
 
-  @Delete(":id/items/:itemId")
-  deleteItem(@Param("id") cartId: number, @Param("itemId") itemId: number) {
-    return this.cartsService.deleteItem(cartId, itemId);
+  @Delete(":cartId/items/:dishId")
+  deleteItem(@Param("cartId") cartId: number, @Param("dishId") dishId: number) {
+    return this.cartsService.deleteItem(cartId, dishId);
   }
 
-  @Patch(":id/items/:itemId")
+  @Patch(":cartId/items/:dishId")
   updateItemQuantity(
-    @Param("id") cartId: number,
-    @Param("itemId") itemId: number,
+    @Param("cartId") cartId: number,
+    @Param("dishId") dishId: number,
     @Body() updateItemQuantity: UpdateItemQuantityDto,
   ) {
     return this.cartsService.updateItemQuantity(
       cartId,
-      itemId,
+      dishId,
       updateItemQuantity,
     );
   }

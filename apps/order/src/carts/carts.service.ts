@@ -47,7 +47,7 @@ export class CartsService {
     return this.cartsRepository.save(cart);
   }
 
-  async deleteItem(cartId: number, itemId: number): Promise<void> {
+  async deleteItem(cartId: number, dishId: number): Promise<void> {
     const cart = await this.cartsRepository.findOne({
       where: { id: cartId },
       relations: { items: true },
@@ -55,26 +55,79 @@ export class CartsService {
     if (!cart) {
       throw new NotFoundException(`Cart with ID ${cartId} not found`);
     }
-    cart.items = cart.items.filter((item) => item.dish_id !== itemId);
+    const item = cart.items.find((item) => item.dish_id === dishId);
+    if (!item) {
+      throw new NotFoundException(`Dish with ID ${dishId} not found`);
+    }
+    cart.items = cart.items.filter((item) => item.dish_id !== dishId);
+    if (!cart.items.length) {
+      return this.remove(cartId);
+    }
     await this.cartsRepository.save(cart);
   }
 
+  // async updateItemQuantity(
+  //   cartId: number,
+  //   itemId: number,
+  //   updateItemQuantityDto: UpdateItemQuantityDto,
+  // ): Promise<Cart | void> {
+  //   const cart = await this.cartsRepository.findOne({
+  //     where: { id: cartId },
+  //     relations: { items: true },
+  //   });
+  //   if (!cart) {
+  //     throw new NotFoundException(`Cart with ID ${cartId} not found`);
+  //   }
+  //   const item = cart.items.find((item) => item.dish_id === itemId);
+  //   if (!item) {
+  //     throw new NotFoundException(
+  //       `Item with dish ID ${itemId} not found in cart`,
+  //     );
+  //   }
+
+  //   const newQuantity = item.quantity + updateItemQuantityDto.quantity;
+
+  //   if (newQuantity <= 0) {
+  //     await this.cartItemsRepository.delete(item.id);
+  //     cart.items = cart.items.filter((i) => i.id !== item.id);
+  //     cart.items.sort((a, b) => a.id - b.id);
+
+  //     if (cart.items.length) {
+  //       return cart;
+  //     } else {
+  //       return;
+  //     }
+  //   }
+
+  //   item.quantity = newQuantity;
+  //   await this.cartItemsRepository.save(item);
+  //   cart.items.sort((a, b) => a.id - b.id);
+
+  //   if (cart.items.length) {
+  //     return cart;
+  //   } else {
+  //     return;
+  //   }
+  // }
+
   async updateItemQuantity(
     cartId: number,
-    itemId: number,
+    dishId: number,
     updateItemQuantityDto: UpdateItemQuantityDto,
-  ): Promise<Cart> {
+  ): Promise<Cart | void> {
     const cart = await this.cartsRepository.findOne({
       where: { id: cartId },
       relations: { items: true },
     });
+
     if (!cart) {
       throw new NotFoundException(`Cart with ID ${cartId} not found`);
     }
-    const item = cart.items.find((item) => item.dish_id === itemId);
+
+    const item = cart.items.find((i) => i.dish_id === dishId);
     if (!item) {
       throw new NotFoundException(
-        `Item with dish ID ${itemId} not found in cart`,
+        `Item with dish ID ${dishId} not found in cart`,
       );
     }
 
@@ -83,13 +136,18 @@ export class CartsService {
     if (newQuantity <= 0) {
       await this.cartItemsRepository.delete(item.id);
       cart.items = cart.items.filter((i) => i.id !== item.id);
-      cart.items.sort((a, b) => a.id - b.id);
-      return cart;
+    } else {
+      item.quantity = newQuantity;
+      await this.cartItemsRepository.save(item);
     }
 
-    item.quantity = newQuantity;
-    await this.cartItemsRepository.save(item);
     cart.items.sort((a, b) => a.id - b.id);
+
+    if (!cart.items.length) {
+      await this.remove(cart.id);
+      return;
+    }
+
     return cart;
   }
 
@@ -98,9 +156,15 @@ export class CartsService {
     this.ordersService.createOrderFromCart(orderPayload);
   }
 
-  async remove(id: number): Promise<Cart> {
-    const cart = await this.findOne(id);
-    return this.cartsRepository.remove(cart);
+  async remove(cartId: number): Promise<void> {
+    const cart = await this.cartsRepository.findOne({
+      where: { id: cartId },
+      relations: { items: true },
+    });
+    if (!cart) {
+      throw new NotFoundException(`Cart with ID ${cartId} not found`);
+    }
+    await this.cartsRepository.remove(cart);
   }
 
   async findAll(paginationQuery: PaginationQueryDto): Promise<Cart[]> {
