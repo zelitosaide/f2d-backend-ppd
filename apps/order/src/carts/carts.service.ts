@@ -66,50 +66,6 @@ export class CartsService {
     await this.cartsRepository.save(cart);
   }
 
-  // async updateItemQuantity(
-  //   cartId: number,
-  //   itemId: number,
-  //   updateItemQuantityDto: UpdateItemQuantityDto,
-  // ): Promise<Cart | void> {
-  //   const cart = await this.cartsRepository.findOne({
-  //     where: { id: cartId },
-  //     relations: { items: true },
-  //   });
-  //   if (!cart) {
-  //     throw new NotFoundException(`Cart with ID ${cartId} not found`);
-  //   }
-  //   const item = cart.items.find((item) => item.dish_id === itemId);
-  //   if (!item) {
-  //     throw new NotFoundException(
-  //       `Item with dish ID ${itemId} not found in cart`,
-  //     );
-  //   }
-
-  //   const newQuantity = item.quantity + updateItemQuantityDto.quantity;
-
-  //   if (newQuantity <= 0) {
-  //     await this.cartItemsRepository.delete(item.id);
-  //     cart.items = cart.items.filter((i) => i.id !== item.id);
-  //     cart.items.sort((a, b) => a.id - b.id);
-
-  //     if (cart.items.length) {
-  //       return cart;
-  //     } else {
-  //       return;
-  //     }
-  //   }
-
-  //   item.quantity = newQuantity;
-  //   await this.cartItemsRepository.save(item);
-  //   cart.items.sort((a, b) => a.id - b.id);
-
-  //   if (cart.items.length) {
-  //     return cart;
-  //   } else {
-  //     return;
-  //   }
-  // }
-
   async updateItemQuantity(
     cartId: number,
     dishId: number,

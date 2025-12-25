@@ -24,6 +24,14 @@ export class RestaurantsController {
     return this.restaurantsService.findOne(id);
   }
 
+  @Get(":restaurantId/dishes/:dishId")
+  findOneDish(
+    @Param("restaurantId") restaurantId: number,
+    @Param("dishId") dishId: number,
+  ) {
+    return this.restaurantsService.findOneDish(restaurantId, dishId);
+  }
+
   @MessagePattern("updateRestaurant")
   update(@Payload() updateRestaurantDto: UpdateRestaurantDto) {
     return this.restaurantsService.update(
