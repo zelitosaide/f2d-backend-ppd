@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsString } from "class-validator";
+import { IsInt, IsNumber, IsPositive, IsString } from "class-validator";
 
 export class CartItemDto {
   @IsInt()
@@ -17,6 +17,7 @@ export class CartItemDto {
   readonly dish_image_url: string;
 
   @IsInt()
+  @IsPositive()
   readonly quantity: number;
 
   @IsNumber()
