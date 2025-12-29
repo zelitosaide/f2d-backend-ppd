@@ -70,7 +70,7 @@ export class CartsService {
     cartId: number,
     dishId: number,
     updateItemQuantityDto: UpdateItemQuantityDto,
-  ): Promise<Cart | void> {
+  ): Promise<Cart> {
     const cart = await this.cartsRepository.findOne({
       where: { id: cartId },
       relations: { items: true },
@@ -101,7 +101,10 @@ export class CartsService {
 
     if (!cart.items.length) {
       await this.remove(cart.id);
-      return;
+      return {
+        ...cart,
+        items: [],
+      };
     }
 
     return cart;
