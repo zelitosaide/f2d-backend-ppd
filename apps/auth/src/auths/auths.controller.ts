@@ -1,11 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthsService } from './auths.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from "@nestjs/common";
+import { AuthsService } from "./auths.service";
+import { CreateAuthDto } from "./dto/create-auth.dto";
+import { UpdateAuthDto } from "./dto/update-auth.dto";
 
-@Controller('auths')
+@Controller("webhooks")
 export class AuthsController {
   constructor(private readonly authsService: AuthsService) {}
+
+  @Post("inbound-message")
+  inbound(@Body() body: any) {
+    console.log(body);
+    return { ok: true };
+  }
+
+  @Post("message-status")
+  status(@Body() body: any) {
+    console.log(body);
+    return { ok: true };
+  }
 
   @Post()
   create(@Body() createAuthDto: CreateAuthDto) {
@@ -17,18 +37,18 @@ export class AuthsController {
     return this.authsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(":id")
+  findOne(@Param("id") id: string) {
     return this.authsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateAuthDto: UpdateAuthDto) {
     return this.authsService.update(+id, updateAuthDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete(":id")
+  remove(@Param("id") id: string) {
     return this.authsService.remove(+id);
   }
 }
