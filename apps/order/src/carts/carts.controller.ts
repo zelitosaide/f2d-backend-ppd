@@ -40,9 +40,9 @@ export class CartsController {
     );
   }
 
-  @Post(":id/checkout")
-  checkout(@Param() id: number) {
-    return this.cartsService.checkout(id);
+  @Post(":userId/checkout")
+  checkout(@Param() userId: number) {
+    return this.cartsService.checkout(userId);
   }
 
   @Delete(":id")

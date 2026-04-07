@@ -1,6 +1,13 @@
 ## Run
 
 ```bash
+# ssh -lroot -p22 109.205.183.229
+# contabo: zelitosaide83@gmail.com:KRHbFiVGR4cS
+# contabo:server: zelitosaide83@gmail.com:JoanaZelito@1
+# npm install
+```
+
+```bash
 npm run start:dev -> order
 npm run start:dev -> payment
 npm run start:dev -> restaurant

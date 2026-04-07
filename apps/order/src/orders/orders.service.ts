@@ -5,6 +5,23 @@ import { lastValueFrom } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
 import { PAYMENTS_SERVICE } from "../constants";
 
+type CartItem = {
+  id: number;
+  restaurant_id: number;
+  dish_id: number;
+  dish_name: string;
+  dish_description: string;
+  dish_image_url: string;
+  quantity: number;
+  price: number;
+};
+
+type Cart = {
+  user_id: number;
+  items: CartItem[];
+  total: number | null;
+};
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -32,7 +49,7 @@ export class OrdersService {
     return `This action removes a #${id} order`;
   }
 
-  createOrderFromCart(orderPayload: { id: number }) {
+  createOrderFromCart(cart: Cart) {
     this.processPayment();
   }
 

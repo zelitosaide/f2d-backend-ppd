@@ -110,9 +110,10 @@ export class CartsService {
     return cart;
   }
 
-  async checkout(id: number) {
-    const orderPayload = { id };
-    this.ordersService.createOrderFromCart(orderPayload);
+  async checkout(userId: number) {
+    const cart = await this.findOne(userId);
+    const { id, created_at, updated_at, ...cartWithoutDates } = cart;
+    this.ordersService.createOrderFromCart(cartWithoutDates);
   }
 
   async remove(cartId: number): Promise<void> {
