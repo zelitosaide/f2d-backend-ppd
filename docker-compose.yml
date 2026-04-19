@@ -7,7 +7,7 @@ services:
         - APP_NAME=order
     command: npm run start:dev -- order
     ports:
-      - 3001:3001
+      - 4001:4001
     environment:
       - POSTGRES_HOST=order-db
       - POSTGRES_PORT=5432
@@ -37,7 +37,7 @@ services:
         - APP_NAME=restaurant
     command: npm run start:dev -- restaurant
     ports:
-      - 3003:3003
+      - 4003:4003
     environment:
       - POSTGRES_HOST=restaurant-db
       - POSTGRES_PORT=5432
@@ -67,7 +67,7 @@ services:
         - APP_NAME=user
     command: npm run start:dev -- user
     ports:
-      - 3004:3004
+      - 4004:4004
     environment:
       - POSTGRES_HOST=user-db
       - POSTGRES_PORT=5432
@@ -96,7 +96,7 @@ services:
         - APP_NAME=auth
     command: npm run start:dev -- auth
     ports:
-      - 3000:3000
+      - 4000:4000
     environment:
       - POSTGRES_HOST=auth-db
       - POSTGRES_PORT=5432
@@ -126,7 +126,7 @@ services:
         - APP_NAME=payment
     command: npm run start:dev -- payment
     ports:
-      - 3002:3002
+      - 4002:4002
     environment:
       - POSTGRES_HOST=payment-db
       - POSTGRES_PORT=5432
@@ -157,7 +157,7 @@ services:
   #       - APP_NAME=f2d-reporting
   #   command: npm run start:dev -- f2d-reporting
   #   ports:
-  #     - 3003:3003
+  #     - 4003:4003
   #   volumes:
   #     - ./libs:/usr/src/app/libs
   #     - ./package.json:/usr/src/app/package.json
