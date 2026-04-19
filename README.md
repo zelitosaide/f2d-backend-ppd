@@ -4,6 +4,9 @@
 # ssh -lroot -p22 109.205.183.229
 # contabo: zelitosaide83@gmail.com:KRHbFiVGR4cS
 # contabo:server: zelitosaide83@gmail.com:JoanaZelito@1
+# ssh root@www.lab.med.uem.mz -p 30 -> lab
+# ssh root@www.med.uem.mz -p 32 -> med
+# sqlite3 caminho/para/banco.db
 # npm install
 ```
 
