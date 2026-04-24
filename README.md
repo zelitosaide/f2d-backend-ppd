@@ -1,5 +1,9 @@
 ## Run
 
+```sh
+docker compose up -d --build order
+```
+
 ```bash
 # ssh -lroot -p22 109.205.183.229
 # contabo: zelitosaide83@gmail.com:KRHbFiVGR4cS
