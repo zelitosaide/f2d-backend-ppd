@@ -29,7 +29,7 @@ export class CartsService {
         items: [cartItem],
       });
       const savedCart = await this.cartsRepository.save(newCart);
-      savedCart.items.sort((a, b) => a.id - b.id);
+      // savedCart.items.sort((a, b) => a.id - b.id);
       return savedCart;
     }
     const existingItem = cart.items.find(
@@ -43,7 +43,7 @@ export class CartsService {
       cart.items.push(newItem);
       await this.cartItemsRepository.save(newItem);
     }
-    cart.items.sort((a, b) => a.id - b.id);
+    // cart.items.sort((a, b) => a.id - b.id);
     return this.cartsRepository.save(cart);
   }
 
@@ -97,7 +97,7 @@ export class CartsService {
       await this.cartItemsRepository.save(item);
     }
 
-    cart.items.sort((a, b) => a.id - b.id);
+    // cart.items.sort((a, b) => a.id - b.id);
 
     if (!cart.items.length) {
       await this.remove(cart.id);
