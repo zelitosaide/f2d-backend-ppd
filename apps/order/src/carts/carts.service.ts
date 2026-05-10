@@ -7,6 +7,8 @@ import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
 import { UpdateItemQuantityDto } from "./dto/update-item-quantity-dto";
 import { CartItemDto } from "./dto/cart-item-dto";
 import { CartItem } from "./entities/cart-item.entity";
+import { CheckoutDto } from "./dto/checkout-dto";
+import { OrderStatus } from "@app/orders";
 
 @Injectable()
 export class CartsService {
@@ -110,10 +112,17 @@ export class CartsService {
     return cart;
   }
 
-  async checkout(userId: number) {
+  async checkout(checkoutDto: CheckoutDto) {
+    const userId = checkoutDto.user_id;
     const cart = await this.findOne(userId);
     const { id, created_at, updated_at, ...cartWithoutDates } = cart;
-    this.ordersService.createOrderFromCart(cartWithoutDates);
+    const cleanCart = {
+      ...cartWithoutDates,
+      items: cart.items.map(({ id, created_at, ...item }) => item),
+      status: OrderStatus.CREATED,
+      notes: "Tenho Alergia",
+    };
+    this.ordersService.create(cleanCart);
   }
 
   async remove(cartId: number): Promise<void> {

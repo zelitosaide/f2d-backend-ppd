@@ -21,6 +21,13 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@app/orders": [
+        "libs/orders/src"
+      ],
+      "@app/orders/*": [
+        "libs/orders/src/*"
+      ]
+    }
   }
 }

@@ -44,6 +44,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=restaurants
+      - NATS_URL=nats://nats:4222
     volumes:
       - ./libs:/usr/src/app/libs
       - ./package.json:/usr/src/app/package.json
@@ -52,6 +53,7 @@ services:
     depends_on:
       - restaurant-db
       - order
+      - nats
   restaurant-db:
     image: postgres:18-alpine
     environment:
@@ -168,5 +170,24 @@ services:
   #     - payment
   #     - user
   #     - restaurant
+  # Notification service
+  notification:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - APP_NAME=notification
+    command: npm run start:dev -- notification
+    ports:
+      - 4005:4005
+    environment:
+      - NATS_URL=nats://nats:4222
+    volumes:
+      - ./libs:/usr/src/app/libs
+      - ./package.json:/usr/src/app/package.json
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./apps/notification:/usr/src/app/apps/notification
+    depends_on:
+      - nats
   nats:
     image: nats:2.12.1-alpine

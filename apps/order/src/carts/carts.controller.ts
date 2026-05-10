@@ -12,6 +12,7 @@ import { CartsService } from "./carts.service";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
 import { UpdateItemQuantityDto } from "./dto/update-item-quantity-dto";
 import { CartItemDto } from "./dto/cart-item-dto";
+import { CheckoutDto } from "./dto/checkout-dto";
 
 @Controller("carts")
 export class CartsController {
@@ -40,9 +41,9 @@ export class CartsController {
     );
   }
 
-  @Post(":userId/checkout")
-  checkout(@Param() userId: number) {
-    return this.cartsService.checkout(userId);
+  @Post("checkout")
+  checkout(@Body() checkoutDto: CheckoutDto) {
+    return this.cartsService.checkout(checkoutDto);
   }
 
   @Delete(":id")

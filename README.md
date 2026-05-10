@@ -1,10 +1,14 @@
 ## Run
 
 ```sh
+https://socket.io/how-to/use-with-react
+
 docker compose up -d --build order
 ```
 
 ```bash
+g class common/dto/pagination-query.dto --flat --no-spec --dry-run
+
 # ssh -lroot -p22 109.205.183.229
 # contabo: zelitosaide83@gmail.com:KRHbFiVGR4cS
 # contabo:server: zelitosaide83@gmail.com:JoanaZelito@1

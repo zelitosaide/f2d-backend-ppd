@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Post, Query } from "@nestjs/common";
-import { MessagePattern, Payload } from "@nestjs/microservices";
+import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
 import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
@@ -8,6 +8,13 @@ import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 @Controller("restaurants")
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
+
+  @EventPattern("payment.processed")
+  // update(@Payload() updateOrderDto: UpdateOrderDto) {
+  update(@Payload() updateOrderDto: any) {
+    // this.ordersService.update(updateOrderDto.id, updateOrderDto);
+    this.restaurantsService.update(updateOrderDto);
+  }
 
   @Post()
   create(@Payload() createRestaurantDto: CreateRestaurantDto) {
@@ -32,13 +39,13 @@ export class RestaurantsController {
     return this.restaurantsService.findOneDish(restaurantId, dishId);
   }
 
-  @MessagePattern("updateRestaurant")
-  update(@Payload() updateRestaurantDto: UpdateRestaurantDto) {
-    return this.restaurantsService.update(
-      updateRestaurantDto.id,
-      updateRestaurantDto,
-    );
-  }
+  // @MessagePattern("updateRestaurant")
+  // update(@Payload() updateRestaurantDto: UpdateRestaurantDto) {
+  //   return this.restaurantsService.update(
+  //     updateRestaurantDto.id,
+  //     updateRestaurantDto,
+  //   );
+  // }
 
   @MessagePattern("removeRestaurant")
   remove(@Payload() id: number) {

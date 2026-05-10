@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/auth/tsconfig.app.json"
       }
     },
+    "notification": {
+      "type": "application",
+      "root": "apps/notification",
+      "entryFile": "main",
+      "sourceRoot": "apps/notification/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notification/tsconfig.app.json"
+      }
+    },
     "order": {
       "type": "application",
       "root": "apps/order",
@@ -26,6 +35,15 @@
       "sourceRoot": "apps/order/src",
       "compilerOptions": {
         "tsConfigPath": "apps/order/tsconfig.app.json"
+      }
+    },
+    "orders": {
+      "type": "library",
+      "root": "libs/orders",
+      "entryFile": "index",
+      "sourceRoot": "libs/orders/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/orders/tsconfig.lib.json"
       }
     },
     "payment": {

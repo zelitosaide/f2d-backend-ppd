@@ -1,34 +1,37 @@
-import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { Controller, Get, Param, Query } from "@nestjs/common";
+import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
+import { OrdersService } from "./orders.service";
+import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
+import { UpdateOrderStatusEventDto } from "@app/orders";
 
-@Controller()
+@Controller("orders")
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @MessagePattern('createOrder')
-  create(@Payload() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  @EventPattern("payment.processed")
+  update(@Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto) {
+    this.ordersService.update(
+      updateOrderStatusEventDto.data.orderId,
+      updateOrderStatusEventDto,
+    );
   }
 
-  @MessagePattern('findAllOrders')
-  findAll() {
-    return this.ordersService.findAll();
+  @Get()
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.ordersService.findAll(paginationQuery);
   }
 
-  @MessagePattern('findOneOrder')
-  findOne(@Payload() id: number) {
-    return this.ordersService.findOne(id);
+  @Get(":userId")
+  findOne(@Param("userId") userId: number) {
+    return this.ordersService.findOne(userId);
   }
 
-  @MessagePattern('updateOrder')
-  update(@Payload() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(updateOrderDto.id, updateOrderDto);
-  }
+  // @MessagePattern("updateOrder")
+  // update(@Payload() updateOrderDto: UpdateOrderDto) {
+  //   return this.ordersService.update(updateOrderDto.id, updateOrderDto);
+  // }
 
-  @MessagePattern('removeOrder')
+  @MessagePattern("removeOrder")
   remove(@Payload() id: number) {
     return this.ordersService.remove(id);
   }

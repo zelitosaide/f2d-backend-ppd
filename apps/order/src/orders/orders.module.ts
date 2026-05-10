@@ -2,19 +2,23 @@ import { Module } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 import { OrdersController } from "./orders.controller";
 import { ClientsModule, Transport } from "@nestjs/microservices";
-import { PAYMENTS_SERVICE } from "../constants";
+import { NATS_CLIENT } from "../constants";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Order } from "./entities/order.entity";
+import { Item } from "./entities/item.entity";
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: PAYMENTS_SERVICE,
+        name: NATS_CLIENT,
         transport: Transport.NATS,
         options: {
           servers: process.env.NATS_URL,
         },
       },
     ]),
+    TypeOrmModule.forFeature([Order, Item]),
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

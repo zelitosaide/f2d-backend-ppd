@@ -1,8 +1,9 @@
 import { Module } from "@nestjs/common";
 import { PaymentController } from "./payment.controller";
 import { PaymentService } from "./payment.service";
-import { PaymentsModule } from "./payments/payments.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ClientsModule, Transport } from "@nestjs/microservices";
+import { NATS_CLIENT } from "./constants";
 
 @Module({
   imports: [
@@ -16,7 +17,16 @@ import { TypeOrmModule } from "@nestjs/typeorm";
       autoLoadEntities: true,
       synchronize: true,
     }),
-    PaymentsModule,
+
+    ClientsModule.register([
+      {
+        name: NATS_CLIENT,
+        transport: Transport.NATS,
+        options: {
+          servers: process.env.NATS_URL,
+        },
+      },
+    ]),
   ],
   controllers: [PaymentController],
   providers: [PaymentService],

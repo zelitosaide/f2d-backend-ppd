@@ -1,13 +1,32 @@
 import { NestFactory } from "@nestjs/core";
 import { RestaurantModule } from "./restaurant.module";
+import { MicroserviceOptions, Transport } from "@nestjs/microservices";
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(RestaurantModule);
-  // app.enableCors({
-  //   origin: "*",
-  //   methods: ["GET", "POST", "PATCH", "DELETE"],
-  //   allowedHeaders: ["Content-Type", "Authorization"],
-  // });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.NATS,
+      options: {
+        servers: process.env.NATS_URL,
+      },
+    },
+    { inheritAppConfig: true },
+  );
+  await app.startAllMicroservices();
   await app.listen(process.env.port ?? 4003);
 }
 bootstrap();

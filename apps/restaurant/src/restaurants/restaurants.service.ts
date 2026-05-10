@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -6,6 +6,10 @@ import { Repository } from "typeorm";
 import { Restaurant } from "./entities/restaurant.entity";
 import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { Dish } from "./entities/dish.entity";
+import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
+import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
+import { ClientProxy } from "@nestjs/microservices";
+import { NATS_CLIENT } from "../constants";
 
 @Injectable()
 export class RestaurantsService {
@@ -14,7 +18,24 @@ export class RestaurantsService {
     private readonly restaurantsRepository: Repository<Restaurant>,
     @InjectRepository(Dish)
     private readonly dishesRepository: Repository<Dish>,
+    @Inject(NATS_CLIENT)
+    private readonly natsClient: ClientProxy,
   ) {}
+
+  update(updateOrderDto: any) {
+    const event: UpdateOrderStatusEventDto = {
+      event: OrderEventType.NOTIFICATION,
+      timestamp: new Date().toISOString(),
+      data: {
+        orderId: updateOrderDto.data.orderId,
+        status: OrderStatus.REFUNDED,
+        amount: updateOrderDto.data.amout,
+        userId: updateOrderDto.data.userId,
+      },
+    };
+
+    this.natsClient.emit(OrderEventType.NOTIFICATION, event);
+  }
 
   create(createRestaurantDto: CreateRestaurantDto) {
     const restaurant = this.restaurantsRepository.create(createRestaurantDto);
@@ -71,9 +92,9 @@ export class RestaurantsService {
     return dish;
   }
 
-  update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
-    return `This action updates a #${id} restaurant`;
-  }
+  // update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
+  //   return `This action updates a #${id} restaurant`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} restaurant`;

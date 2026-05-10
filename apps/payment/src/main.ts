@@ -1,9 +1,20 @@
 import { NestFactory } from "@nestjs/core";
 import { PaymentModule } from "./payment.module";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(PaymentModule);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   app.connectMicroservice<MicroserviceOptions>(
     {
@@ -15,7 +26,6 @@ async function bootstrap() {
     { inheritAppConfig: true },
   );
   await app.startAllMicroservices();
-
   await app.listen(process.env.port ?? 4002);
 }
 bootstrap();
