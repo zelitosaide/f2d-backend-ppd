@@ -9,7 +9,12 @@ import {
 } from "@nestjs/websockets";
 import { Socket, Server } from "socket.io";
 
-@WebSocketGateway()
+@WebSocketGateway({
+  path: "/v1/notification/socket.io",
+  cors: {
+    origin: "*",
+  },
+})
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(EventsGateway.name);
 
