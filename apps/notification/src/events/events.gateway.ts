@@ -1,3 +1,5 @@
+import { UpdateOrderStatusEventDto } from "@app/orders";
+import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
 import { Logger } from "@nestjs/common";
 import {
   OnGatewayConnection,
@@ -9,14 +11,57 @@ import { Socket, Server } from "socket.io";
 
 @WebSocketGateway()
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  // private readonly logger = new Logger(EventsGateway.name);
+  private readonly logger = new Logger(EventsGateway.name);
 
   @WebSocketServer()
   server!: Server;
 
-  handleOrderUpdate(event: any) {
-    // this.logger.log(event);
-    this.server.emit("order.update", event);
+  async handleOrderStatusUpdated(
+    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
+    if (updateOrderStatusEventDto.data.status === "CREATED") {
+      this.logger.debug("ORDER RECEIVED");
+      this.server.emit(OrderEventType.ORDER_CREATED, updateOrderStatusEventDto);
+    }
+
+    if (updateOrderStatusEventDto.data.status === "PREPARING") {
+      this.logger.debug("PREPARING YOUR ORDER...");
+      this.server.emit(
+        OrderEventType.ORDER_PREPARING_STARTED,
+        updateOrderStatusEventDto,
+      );
+    }
+
+    if (updateOrderStatusEventDto.data.status === "PICKING_UP") {
+      this.logger.debug("PICKING UP YOUR ORDER...");
+      this.server.emit(
+        OrderEventType.ORDER_PICKUP_STARTED,
+        updateOrderStatusEventDto,
+      );
+    }
+
+    if (updateOrderStatusEventDto.data.status === "OUT_FOR_DELIVERY") {
+      this.logger.debug("HEADING YOUR WAY...");
+      this.server.emit(
+        OrderEventType.ORDER_OUT_FOR_DELIVERY,
+        updateOrderStatusEventDto,
+      );
+    }
+
+    if (updateOrderStatusEventDto.data.status === "NEARBY") {
+      this.logger.debug("ALMOST HERE!");
+      this.server.emit(OrderEventType.ORDER_NEARBY, updateOrderStatusEventDto);
+    }
+
+    if (updateOrderStatusEventDto.data.status === "DELIVERED") {
+      this.logger.debug("DELIVERED");
+      this.server.emit(
+        OrderEventType.ORDER_DELIVERED,
+        updateOrderStatusEventDto,
+      );
+    }
+
+    this.logger.debug(updateOrderStatusEventDto);
   }
 
   handleDisconnect(client: Socket) {

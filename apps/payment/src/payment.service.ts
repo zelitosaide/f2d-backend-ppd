@@ -1,7 +1,7 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { NATS_CLIENT } from "./constants";
-import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
+import { OrderStatus, UpdateOrderStatusEventDto, wait } from "@app/orders";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
 
@@ -11,6 +11,7 @@ export class PaymentService {
     @Inject(NATS_CLIENT)
     private readonly natsClient: ClientProxy,
   ) {}
+  private readonly logger = new Logger(PaymentService.name);
 
   getHello(): string {
     return "Hello World!";
@@ -24,7 +25,9 @@ export class PaymentService {
     return `Limit: ${limit}, Offset: ${offset}`;
   }
 
-  update(updateOrderStatusEventDto: UpdateOrderStatusEventDto) {
+  async handleOrderStatusUpdated(
+    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
     // 1. Processar o pagamento
 
     // 2. Atualizar o estado do pedido

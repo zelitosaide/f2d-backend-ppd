@@ -8,9 +8,18 @@ import { UpdateOrderStatusEventDto } from "@app/orders";
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @EventPattern("payment.processed")
-  update(@Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto) {
-    this.ordersService.update(
+  @EventPattern([
+    "payment.processed",
+    "order.preparing.started",
+    "order.pickup.started",
+    "order.out.for.delivery",
+    "order.nearby",
+    "order.delivered",
+  ])
+  handleOrderStatusUpdated(
+    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
+    this.ordersService.handleOrderStatusUpdated(
       updateOrderStatusEventDto.data.orderId,
       updateOrderStatusEventDto,
     );

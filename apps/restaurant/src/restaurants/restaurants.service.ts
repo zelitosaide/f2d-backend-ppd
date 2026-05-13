@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -6,7 +6,7 @@ import { Repository } from "typeorm";
 import { Restaurant } from "./entities/restaurant.entity";
 import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { Dish } from "./entities/dish.entity";
-import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
+import { OrderStatus, UpdateOrderStatusEventDto, wait } from "@app/orders";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
 import { ClientProxy } from "@nestjs/microservices";
 import { NATS_CLIENT } from "../constants";
@@ -22,19 +22,80 @@ export class RestaurantsService {
     private readonly natsClient: ClientProxy,
   ) {}
 
-  update(updateOrderDto: any) {
+  async updateOrderStatus() {
+    await wait(5000);
+
     const event: UpdateOrderStatusEventDto = {
-      event: OrderEventType.NOTIFICATION,
+      event: OrderEventType.ORDER_PICKUP_STARTED,
       timestamp: new Date().toISOString(),
       data: {
-        orderId: updateOrderDto.data.orderId,
-        status: OrderStatus.REFUNDED,
-        amount: updateOrderDto.data.amout,
-        userId: updateOrderDto.data.userId,
+        orderId: 1,
+        status: OrderStatus.PICKING_UP,
+        amount: 1,
+        userId: 1,
       },
     };
+    this.natsClient.emit(OrderEventType.ORDER_PICKUP_STARTED, event);
 
-    this.natsClient.emit(OrderEventType.NOTIFICATION, event);
+    await wait(5000);
+    const event2: UpdateOrderStatusEventDto = {
+      event: OrderEventType.ORDER_OUT_FOR_DELIVERY,
+      timestamp: new Date().toISOString(),
+      data: {
+        orderId: 1,
+        status: OrderStatus.OUT_FOR_DELIVERY,
+        amount: 1,
+        userId: 1,
+      },
+    };
+    this.natsClient.emit(OrderEventType.ORDER_OUT_FOR_DELIVERY, event2);
+
+    // ETA < 2 minutos
+    await wait(5000);
+    const event3: UpdateOrderStatusEventDto = {
+      event: OrderEventType.ORDER_NEARBY,
+      timestamp: new Date().toISOString(),
+      data: {
+        orderId: 1,
+        status: OrderStatus.NEARBY,
+        amount: 1,
+        userId: 1,
+      },
+    };
+    this.natsClient.emit(OrderEventType.ORDER_NEARBY, event3);
+
+    // Check PIN
+    await wait(5000);
+    const event4: UpdateOrderStatusEventDto = {
+      event: OrderEventType.ORDER_DELIVERED,
+      timestamp: new Date().toISOString(),
+      data: {
+        orderId: 1,
+        status: OrderStatus.DELIVERED,
+        amount: 1,
+        userId: 1,
+      },
+    };
+    this.natsClient.emit(OrderEventType.ORDER_DELIVERED, event4);
+    return;
+  }
+
+  async handleOrderStatusUpdated(
+    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
+    await wait(5000);
+
+    const event: UpdateOrderStatusEventDto = {
+      event: OrderEventType.ORDER_PREPARING_STARTED,
+      timestamp: new Date().toISOString(),
+      data: {
+        orderId: updateOrderStatusEventDto.data.orderId,
+        status: OrderStatus.PREPARING,
+        amount: updateOrderStatusEventDto.data.amount,
+        userId: updateOrderStatusEventDto.data.userId,
+      },
+    };
+    this.natsClient.emit(OrderEventType.ORDER_PREPARING_STARTED, event);
   }
 
   create(createRestaurantDto: CreateRestaurantDto) {

@@ -18,8 +18,10 @@ export class PaymentController {
     return this.paymentService.findAll(paginationQuery);
   }
 
-  @EventPattern("order.created")
-  update(@Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto) {
-    this.paymentService.update(updateOrderStatusEventDto);
+  @EventPattern("order.initiated")
+  handleOrderStatusUpdated(
+    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
+    this.paymentService.handleOrderStatusUpdated(updateOrderStatusEventDto);
   }
 }

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 // import { lastValueFrom } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
@@ -7,7 +7,7 @@ import { Order } from "./entities/order.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
-import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
+import { OrderStatus, UpdateOrderStatusEventDto, wait } from "@app/orders";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
 
 @Injectable()
@@ -18,6 +18,7 @@ export class OrdersService {
     @Inject(NATS_CLIENT)
     private readonly natsClient: ClientProxy,
   ) {}
+  // private readonly logger = new Logger(OrdersService.name);
 
   async create(createOrderDto: CreateOrderDto) {
     // 1. Criar order
@@ -25,18 +26,18 @@ export class OrdersService {
     const savedOrder = await this.ordersRepository.save(order);
 
     const event: UpdateOrderStatusEventDto = {
-      event: OrderEventType.ORDER_CREATED,
+      event: OrderEventType.ORDER_INITIATED,
       timestamp: new Date().toISOString(),
       data: {
         orderId: savedOrder.id,
-        status: OrderStatus.CREATED,
+        status: OrderStatus.INITIATED,
         amount: savedOrder.total,
         userId: savedOrder.user_id,
       },
     };
 
     // 2. Chamar payment-service
-    this.natsClient.emit(OrderEventType.ORDER_CREATED, event);
+    this.natsClient.emit(OrderEventType.ORDER_INITIATED, event);
 
     return savedOrder;
   }
@@ -70,7 +71,7 @@ export class OrdersService {
     return order;
   }
 
-  async update(
+  async handleOrderStatusUpdated(
     id: number,
     updateOrderStatusEventDto: UpdateOrderStatusEventDto,
   ) {
@@ -82,18 +83,21 @@ export class OrdersService {
       throw new NotFoundException(`Order #${id} not found`);
     }
 
-    const event: UpdateOrderStatusEventDto = {
-      event: OrderEventType.NOTIFICATION,
-      timestamp: new Date().toISOString(),
-      data: {
-        orderId: id,
-        status: OrderStatus.PAID,
-        amount: order.total,
-        userId: order.user_id,
-      },
-    };
+    if (updateOrderStatusEventDto.data.status === "PAID") {
+      await wait(5000);
 
-    this.natsClient.emit(OrderEventType.NOTIFICATION, event);
+      const event: UpdateOrderStatusEventDto = {
+        event: OrderEventType.ORDER_CREATED,
+        timestamp: new Date().toISOString(),
+        data: {
+          orderId: id,
+          status: OrderStatus.CREATED,
+          amount: order.total,
+          userId: order.user_id,
+        },
+      };
+      this.natsClient.emit(OrderEventType.ORDER_CREATED, event);
+    }
 
     return this.ordersRepository.save(order);
   }

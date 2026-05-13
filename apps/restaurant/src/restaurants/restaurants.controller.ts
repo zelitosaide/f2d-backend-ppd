@@ -4,21 +4,29 @@ import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
 import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
+import { UpdateOrderStatusEventDto } from "@app/orders";
 
 @Controller("restaurants")
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
-  @EventPattern("payment.processed")
+  @EventPattern("order.created")
   // update(@Payload() updateOrderDto: UpdateOrderDto) {
-  update(@Payload() updateOrderDto: any) {
+  handleOrderStatusUpdated(
+    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
     // this.ordersService.update(updateOrderDto.id, updateOrderDto);
-    this.restaurantsService.update(updateOrderDto);
+    this.restaurantsService.handleOrderStatusUpdated(updateOrderStatusEventDto);
   }
 
   @Post()
   create(@Payload() createRestaurantDto: CreateRestaurantDto) {
     return this.restaurantsService.create(createRestaurantDto);
+  }
+
+  @Post("update-order-status")
+  updateOrderStatus() {
+    return this.restaurantsService.updateOrderStatus();
   }
 
   @Get()
