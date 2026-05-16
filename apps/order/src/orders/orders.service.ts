@@ -84,8 +84,6 @@ export class OrdersService {
     }
 
     if (updateOrderStatusEventDto.data.status === "PAID") {
-      await wait(5000);
-
       const event: UpdateOrderStatusEventDto = {
         event: OrderEventType.ORDER_CREATED,
         timestamp: new Date().toISOString(),

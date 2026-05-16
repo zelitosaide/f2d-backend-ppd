@@ -10,8 +10,6 @@ import {
 import { Socket, Server } from "socket.io";
 
 @WebSocketGateway({
-  // path: "/v1/notification/socket.io",
-  path: "/socket.io",
   cors: {
     origin: "*",
   },
