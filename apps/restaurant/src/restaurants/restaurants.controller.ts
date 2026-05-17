@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
 import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
@@ -11,7 +11,6 @@ export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
   @EventPattern("order.created")
-  // update(@Payload() updateOrderDto: UpdateOrderDto) {
   handleOrderStatusUpdated(
     @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
   ) {
@@ -20,13 +19,15 @@ export class RestaurantsController {
   }
 
   @Post()
-  create(@Payload() createRestaurantDto: CreateRestaurantDto) {
+  create(@Body() createRestaurantDto: CreateRestaurantDto) {
     return this.restaurantsService.create(createRestaurantDto);
   }
 
   @Post("update-order-status")
-  updateOrderStatus() {
-    return this.restaurantsService.updateOrderStatus();
+  updateOrderStatus(
+    @Body() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
+    return this.restaurantsService.updateOrderStatus(updateOrderStatusEventDto);
   }
 
   @Get()

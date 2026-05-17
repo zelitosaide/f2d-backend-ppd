@@ -19,7 +19,17 @@ export class Order {
   @OneToMany(() => Item, (item) => item.order, { cascade: true })
   items: Item[];
 
-  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
+  @Column({
+    nullable: true,
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string | null) =>
+        value === null ? null : parseFloat(value),
+    },
+  })
   total: number;
 
   @Column({ nullable: true })

@@ -29,9 +29,9 @@ export class CartsService {
       const newCart = this.cartsRepository.create({
         user_id: userId,
         items: [cartItem],
+        total: cartItem.price * cartItem.quantity,
       });
       const savedCart = await this.cartsRepository.save(newCart);
-      // savedCart.items.sort((a, b) => a.id - b.id);
       return savedCart;
     }
     const existingItem = cart.items.find(
@@ -45,7 +45,10 @@ export class CartsService {
       cart.items.push(newItem);
       await this.cartItemsRepository.save(newItem);
     }
-    // cart.items.sort((a, b) => a.id - b.id);
+    cart.total = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
     return this.cartsRepository.save(cart);
   }
 
@@ -99,17 +102,21 @@ export class CartsService {
       await this.cartItemsRepository.save(item);
     }
 
-    // cart.items.sort((a, b) => a.id - b.id);
-
     if (!cart.items.length) {
       await this.remove(cart.id);
       return {
         ...cart,
         items: [],
+        total: 0,
       };
     }
 
-    return cart;
+    cart.total = cart.items.reduce(
+      (sum, currentItem) => sum + currentItem.price * currentItem.quantity,
+      0,
+    );
+
+    return this.cartsRepository.save(cart);
   }
 
   async checkout(checkoutDto: CheckoutDto) {

@@ -22,61 +22,43 @@ export class RestaurantsService {
     private readonly natsClient: ClientProxy,
   ) {}
 
-  async updateOrderStatus() {
-    await wait(5000);
+  async updateOrderStatus(
+    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
+  ) {
+    if (
+      updateOrderStatusEventDto.event === OrderEventType.ORDER_PICKUP_STARTED
+    ) {
+      this.natsClient.emit(OrderEventType.ORDER_PICKUP_STARTED, {
+        ...updateOrderStatusEventDto,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    const event: UpdateOrderStatusEventDto = {
-      event: OrderEventType.ORDER_PICKUP_STARTED,
-      timestamp: new Date().toISOString(),
-      data: {
-        orderId: 1,
-        status: OrderStatus.PICKING_UP,
-        amount: 1,
-        userId: 1,
-      },
-    };
-    this.natsClient.emit(OrderEventType.ORDER_PICKUP_STARTED, event);
+    if (
+      updateOrderStatusEventDto.event === OrderEventType.ORDER_OUT_FOR_DELIVERY
+    ) {
+      this.natsClient.emit(OrderEventType.ORDER_OUT_FOR_DELIVERY, {
+        ...updateOrderStatusEventDto,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    await wait(5000);
-    const event2: UpdateOrderStatusEventDto = {
-      event: OrderEventType.ORDER_OUT_FOR_DELIVERY,
-      timestamp: new Date().toISOString(),
-      data: {
-        orderId: 1,
-        status: OrderStatus.OUT_FOR_DELIVERY,
-        amount: 1,
-        userId: 1,
-      },
-    };
-    this.natsClient.emit(OrderEventType.ORDER_OUT_FOR_DELIVERY, event2);
+    if (updateOrderStatusEventDto.event === OrderEventType.ORDER_NEARBY) {
+      // ETA < 2 minutos
+      this.natsClient.emit(OrderEventType.ORDER_NEARBY, {
+        ...updateOrderStatusEventDto,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    // ETA < 2 minutos
-    await wait(5000);
-    const event3: UpdateOrderStatusEventDto = {
-      event: OrderEventType.ORDER_NEARBY,
-      timestamp: new Date().toISOString(),
-      data: {
-        orderId: 1,
-        status: OrderStatus.NEARBY,
-        amount: 1,
-        userId: 1,
-      },
-    };
-    this.natsClient.emit(OrderEventType.ORDER_NEARBY, event3);
+    if (updateOrderStatusEventDto.event === OrderEventType.ORDER_DELIVERED) {
+      // Check PIN
+      this.natsClient.emit(OrderEventType.ORDER_DELIVERED, {
+        ...updateOrderStatusEventDto,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
-    // Check PIN
-    await wait(5000);
-    const event4: UpdateOrderStatusEventDto = {
-      event: OrderEventType.ORDER_DELIVERED,
-      timestamp: new Date().toISOString(),
-      data: {
-        orderId: 1,
-        status: OrderStatus.DELIVERED,
-        amount: 1,
-        userId: 1,
-      },
-    };
-    this.natsClient.emit(OrderEventType.ORDER_DELIVERED, event4);
     return;
   }
 

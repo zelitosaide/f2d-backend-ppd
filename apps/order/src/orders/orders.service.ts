@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 // import { lastValueFrom } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
@@ -7,7 +7,7 @@ import { Order } from "./entities/order.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
-import { OrderStatus, UpdateOrderStatusEventDto, wait } from "@app/orders";
+import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
 
 @Injectable()
@@ -60,16 +60,27 @@ export class OrdersService {
     });
   }
 
-  async findOne(userId: number): Promise<Order> {
-    const order = await this.ordersRepository.findOne({
+  async findMany(userId: number): Promise<Order[]> {
+    const orders = await this.ordersRepository.find({
       where: { user_id: userId },
       relations: { items: true },
     });
-    if (!order) {
-      throw new NotFoundException(`order with userID ${userId} not found`);
+    if (orders.length === 0) {
+      throw new NotFoundException(`orders with userID ${userId} not found`);
     }
-    return order;
+    return orders;
   }
+
+  // async findOne(userId: number): Promise<Order> {
+  //   const order = await this.ordersRepository.findOne({
+  //     where: { user_id: userId },
+  //     relations: { items: true },
+  //   });
+  //   if (!order) {
+  //     throw new NotFoundException(`order with userID ${userId} not found`);
+  //   }
+  //   return order;
+  // }
 
   async handleOrderStatusUpdated(
     id: number,

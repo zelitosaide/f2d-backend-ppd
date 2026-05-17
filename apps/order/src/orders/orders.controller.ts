@@ -30,9 +30,14 @@ export class OrdersController {
     return this.ordersService.findAll(paginationQuery);
   }
 
+  // @Get(":userId")
+  // findOne(@Param("userId") userId: number) {
+  //   return this.ordersService.findOne(userId);
+  // }
+
   @Get(":userId")
-  findOne(@Param("userId") userId: number) {
-    return this.ordersService.findOne(userId);
+  findMany(@Param("userId") userId: number) {
+    return this.ordersService.findMany(userId);
   }
 
   // @MessagePattern("updateOrder")
