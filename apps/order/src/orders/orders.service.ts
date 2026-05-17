@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 // import { lastValueFrom } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
@@ -18,7 +18,7 @@ export class OrdersService {
     @Inject(NATS_CLIENT)
     private readonly natsClient: ClientProxy,
   ) {}
-  // private readonly logger = new Logger(OrdersService.name);
+  private readonly logger = new Logger(OrdersService.name);
 
   async create(createOrderDto: CreateOrderDto) {
     // 1. Criar order
@@ -90,8 +90,14 @@ export class OrdersService {
       id,
       status: updateOrderStatusEventDto.data.status,
     });
+
+    // if (!order) {
+    //   throw new NotFoundException(`Order #${id} not found`);
+    // }
+
     if (!order) {
-      throw new NotFoundException(`Order #${id} not found`);
+      this.logger.error(`Order #${id} not found`);
+      return;
     }
 
     if (updateOrderStatusEventDto.data.status === "PAID") {
