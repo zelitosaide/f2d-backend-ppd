@@ -75,6 +75,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
     }
 
+    updateOrderStatusEventDto;
+
     this.logger.debug(updateOrderStatusEventDto);
   }
 
@@ -88,7 +90,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const nearbyPayload = await this.trackingService.processLocationUpdate(dto);
 
     if (nearbyPayload) {
-      this.server.emit(OrderEventType.ORDER_NEARBY, nearbyPayload);
+      this.server.emit(OrderEventType.ORDER_NEARBY, {
+        ...nearbyPayload,
+        event: OrderEventType.ORDER_NEARBY,
+        timestamp: new Date().toISOString(),
+      });
     }
 
     return { ack: true, orderId: dto.orderId };
