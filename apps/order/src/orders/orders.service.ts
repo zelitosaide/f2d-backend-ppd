@@ -54,7 +54,7 @@ export class OrdersService {
   async findAll(paginationQuery: PaginationQueryDto): Promise<Order[]> {
     const { limit, offset } = paginationQuery;
     return this.ordersRepository.find({
-      relations: { items: true },
+      relations: { items: true, address: true },
       skip: offset,
       take: limit,
     });
@@ -63,7 +63,7 @@ export class OrdersService {
   async findMany(userId: number): Promise<Order[]> {
     const orders = await this.ordersRepository.find({
       where: { user_id: userId },
-      relations: { items: true },
+      relations: { items: true, address: true },
     });
     if (orders.length === 0) {
       throw new NotFoundException(`orders with userID ${userId} not found`);
@@ -86,21 +86,20 @@ export class OrdersService {
     id: number,
     updateOrderStatusEventDto: UpdateOrderStatusEventDto,
   ) {
-    const order = await this.ordersRepository.preload({
-      id,
-      status: updateOrderStatusEventDto.data.status,
+    const order = await this.ordersRepository.findOne({
+      where: { id },
+      relations: { items: true, address: true },
     });
-
-    // if (!order) {
-    //   throw new NotFoundException(`Order #${id} not found`);
-    // }
 
     if (!order) {
       this.logger.error(`Order #${id} not found`);
       return;
     }
 
-    if (updateOrderStatusEventDto.data.status === "PAID") {
+    // update fields directly instead of using preload
+    order.status = updateOrderStatusEventDto.data.status;
+
+    if (updateOrderStatusEventDto.data.status === OrderStatus.PAID) {
       const event: UpdateOrderStatusEventDto = {
         event: OrderEventType.ORDER_CREATED,
         timestamp: new Date().toISOString(),
@@ -109,6 +108,7 @@ export class OrdersService {
           status: OrderStatus.CREATED,
           amount: order.total,
           userId: order.user_id,
+          ...(order.address ? { address: order.address } : {}),
         },
       };
       this.natsClient.emit(OrderEventType.ORDER_CREATED, event);

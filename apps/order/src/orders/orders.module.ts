@@ -6,6 +6,7 @@ import { NATS_CLIENT } from "../constants";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
 import { Item } from "./entities/item.entity";
+import { Address } from "./entities/address.entity";
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { Item } from "./entities/item.entity";
         },
       },
     ]),
-    TypeOrmModule.forFeature([Order, Item]),
+    TypeOrmModule.forFeature([Order, Item, Address]),
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

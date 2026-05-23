@@ -9,6 +9,7 @@ import {
 } from "class-validator";
 import { OrderItemDto } from "./order-item-dto";
 import { OrderStatus } from "@app/orders";
+import { Address } from "./address.dto";
 
 export class CreateOrderDto {
   @IsInt()
@@ -30,6 +31,7 @@ export class CreateOrderDto {
   @IsString()
   readonly notes?: string;
 
-  //   @IsString()
-  //   readonly address: string;
+  @IsOptional()
+  @Type(() => Address)
+  readonly address: Address;
 }

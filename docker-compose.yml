@@ -188,6 +188,18 @@ services:
       - ./tsconfig.json:/usr/src/app/tsconfig.json
       - ./apps/notification:/usr/src/app/apps/notification
     depends_on:
-      - nats
+      nats:
+        condition: service_started
+      redis:
+        condition: service_healthy
   nats:
     image: nats:2.12.1-alpine
+
+  redis:
+    image: redis:alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s

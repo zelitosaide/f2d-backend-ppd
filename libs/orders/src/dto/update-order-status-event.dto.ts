@@ -5,14 +5,21 @@ import {
   IsNumber,
   IsOptional,
   ValidateNested,
+  IsLatitude,
+  IsLongitude,
 } from "class-validator";
 import { OrderStatus } from "../enum/order-status.enum";
 import { OrderEventType } from "../enum/order-event-type.enum";
 
-// export enum Currency {
-//   MZN = "MZN",
-//   USD = "USD",
-// }
+export class Address {
+  @IsNumber()
+  @IsLatitude()
+  readonly latitude: number;
+
+  @IsNumber()
+  @IsLongitude()
+  readonly longitude: number;
+}
 
 export class UpdateOrderStatusDataDto {
   @IsNumber()
@@ -25,11 +32,12 @@ export class UpdateOrderStatusDataDto {
   @IsOptional()
   readonly amount: number;
 
-  // @IsEnum(Currency)
-  // readonly currency: Currency;
-
   @IsNumber()
   readonly userId: number;
+
+  @IsOptional()
+  @Type(() => Address)
+  readonly address?: Address;
 }
 
 export class UpdateOrderStatusEventDto {

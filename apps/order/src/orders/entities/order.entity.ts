@@ -2,11 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { Item } from "./item.entity";
+import { Address } from "./address.entity";
 
 @Entity()
 export class Order {
@@ -37,6 +40,10 @@ export class Order {
 
   @Column({ nullable: true })
   notes: string;
+
+  @OneToOne(() => Address, { cascade: true })
+  @JoinColumn()
+  address: Address;
 
   @CreateDateColumn()
   created_at: Date;

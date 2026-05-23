@@ -2,12 +2,17 @@ import { UpdateOrderStatusEventDto } from "@app/orders";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
 import { Logger } from "@nestjs/common";
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
 import { Socket, Server } from "socket.io";
+import { DriverLocationDto } from "./dto/driver-location.dto";
+import { TrackingService } from "./tracking.service";
 
 @WebSocketGateway({
   cors: {
@@ -15,6 +20,8 @@ import { Socket, Server } from "socket.io";
   },
 })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly trackingService: TrackingService) {}
+
   private readonly logger = new Logger(EventsGateway.name);
 
   @WebSocketServer()
@@ -25,6 +32,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (updateOrderStatusEventDto.data.status === "CREATED") {
       this.logger.debug("ORDER RECEIVED");
+
+      if (updateOrderStatusEventDto.data.address) {
+        this.trackingService.registerDestination({
+          orderId: updateOrderStatusEventDto.data.orderId,
+          latitude: updateOrderStatusEventDto.data.address.latitude,
+          longitude: updateOrderStatusEventDto.data.address.longitude,
+        });
+      }
       this.server.emit(OrderEventType.ORDER_CREATED, updateOrderStatusEventDto);
     }
 
@@ -52,11 +67,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
     }
 
-    if (updateOrderStatusEventDto.data.status === "NEARBY") {
-      this.logger.debug("ALMOST HERE!");
-      this.server.emit(OrderEventType.ORDER_NEARBY, updateOrderStatusEventDto);
-    }
-
     if (updateOrderStatusEventDto.data.status === "DELIVERED") {
       this.logger.debug("DELIVERED");
       this.server.emit(
@@ -66,6 +76,22 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.logger.debug(updateOrderStatusEventDto);
+  }
+
+  @SubscribeMessage("driver.location")
+  async handleDriverLocation(
+    @MessageBody() dto: DriverLocationDto,
+    @ConnectedSocket() _client: Socket,
+  ) {
+    this.server.emit("order.location", dto);
+
+    const nearbyPayload = await this.trackingService.processLocationUpdate(dto);
+
+    if (nearbyPayload) {
+      this.server.emit(OrderEventType.ORDER_NEARBY, nearbyPayload);
+    }
+
+    return { ack: true, orderId: dto.orderId };
   }
 
   handleDisconnect(client: Socket) {

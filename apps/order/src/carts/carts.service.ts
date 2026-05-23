@@ -9,6 +9,7 @@ import { CartItemDto } from "./dto/cart-item-dto";
 import { CartItem } from "./entities/cart-item.entity";
 import { CheckoutDto } from "./dto/checkout-dto";
 import { OrderStatus } from "@app/orders";
+import { CreateOrderDto } from "../orders/dto/create-order.dto";
 
 @Injectable()
 export class CartsService {
@@ -123,11 +124,12 @@ export class CartsService {
     const userId = checkoutDto.user_id;
     const cart = await this.findOne(userId);
     const { id, created_at, updated_at, ...cartWithoutDates } = cart;
-    const cleanCart = {
+    const cleanCart: CreateOrderDto = {
       ...cartWithoutDates,
-      items: cart.items.map(({ id, created_at, ...item }) => item),
+      items: cart.items.map(({ id, created_at, cart, ...item }) => item),
       status: OrderStatus.CREATED,
       notes: "Tenho Alergia",
+      address: checkoutDto.address,
     };
     this.ordersService.create(cleanCart);
   }

@@ -4,6 +4,14 @@
 https://socket.io/how-to/use-with-react
 
 docker compose up -d --build order
+
+docker exec -it f2d-redis-1 sh
+redis-cli
+
+GET nome_da_chave
+KEYS *
+FLUSHDB
+
 ```
 
 ```bash
