@@ -80,12 +80,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.debug(updateOrderStatusEventDto);
   }
 
-  @SubscribeMessage("driver.location")
+  @SubscribeMessage("driver.location.updated")
   async handleDriverLocation(
     @MessageBody() dto: DriverLocationDto,
     @ConnectedSocket() _client: Socket,
   ) {
-    this.server.emit("order.location", dto);
+    this.server.emit("order.location.updated", dto);
 
     const nearbyPayload = await this.trackingService.processLocationUpdate(dto);
 

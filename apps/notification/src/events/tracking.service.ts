@@ -42,6 +42,25 @@ const NEARBY_THRESHOLD_METERS = 500;
 //   },
 // ];
 
+// [
+//   {
+//     latitude: -25.9449,
+//     longitude: 32.5437,
+//   },
+//   {
+//     latitude: -25.9461,
+//     longitude: 32.5432,
+//   },
+//   {
+//     latitude: -25.945,
+//     longitude: 32.5465,
+//   },
+//   {
+//     latitude: -25.9475,
+//     longitude: 32.544,
+//   },
+// ];
+
 @Injectable()
 export class TrackingService {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
