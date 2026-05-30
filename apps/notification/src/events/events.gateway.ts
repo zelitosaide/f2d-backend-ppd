@@ -85,7 +85,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() dto: DriverLocationDto,
     @ConnectedSocket() _client: Socket,
   ) {
-    this.server.emit("order.location.updated", dto);
+    this.server.emit("order.location.updated", {
+      ...dto,
+      event: "order.location.updated",
+      timestamp: new Date().toISOString(),
+    });
 
     const nearbyPayload = await this.trackingService.processLocationUpdate(dto);
 
