@@ -10,6 +10,7 @@ import { CartItem } from "./entities/cart-item.entity";
 import { CheckoutDto } from "./dto/checkout-dto";
 import { OrderStatus } from "@app/orders";
 import { CreateOrderDto } from "../orders/dto/create-order.dto";
+import CreateCartDto from "./dto/create-cart.dto";
 
 @Injectable()
 export class CartsService {
@@ -163,5 +164,32 @@ export class CartsService {
       throw new NotFoundException(`Cart with userID ${userId} not found`);
     }
     return cart;
+  }
+
+  create(createCartDto: CreateCartDto) {
+    const cart = this.cartsRepository.create(createCartDto);
+    return this.cartsRepository.save(cart);
+  }
+
+  async reorder(orderId: number): Promise<Cart> {
+    const order = await this.ordersService.findOne(orderId);
+
+    const cartItems = order.items.map((item) => ({
+      restaurant_id: item.restaurant_id,
+      dish_id: item.dish_id,
+      dish_name: item.dish_name,
+      dish_description: item.dish_description,
+      dish_image_url: item.dish_image_url,
+      price: item.price,
+      quantity: item.quantity,
+    }));
+
+    const createCartDto: CreateCartDto = {
+      user_id: order.user_id,
+      items: cartItems,
+      total: order.total,
+    };
+
+    return await this.create(createCartDto);
   }
 }

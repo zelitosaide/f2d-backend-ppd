@@ -3,6 +3,7 @@ import {
   IsArray,
   IsEnum,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -20,7 +21,7 @@ export class CreateOrderDto {
   @Type(() => OrderItemDto)
   readonly items: OrderItemDto[];
 
-  @IsInt()
+  @IsNumber()
   readonly total: number;
 
   @IsOptional()

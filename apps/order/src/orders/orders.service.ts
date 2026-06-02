@@ -9,6 +9,8 @@ import { Repository } from "typeorm";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
 import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
+// import { Cart } from "../carts/entities/cart.entity";
+// import CreateCartDto from "../carts/dto/create-cart.dto";
 
 @Injectable()
 export class OrdersService {
@@ -42,15 +44,6 @@ export class OrdersService {
     return savedOrder;
   }
 
-  // private async processPayment() {
-  //   await lastValueFrom(
-  //     this.natsClient.send("createPayment", {
-  //       currency: "BRL",
-  //       paymentMethod: "credit_card",
-  //     }),
-  //   );
-  // }
-
   async findAll(paginationQuery: PaginationQueryDto): Promise<Order[]> {
     const { limit, offset } = paginationQuery;
     return this.ordersRepository.find({
@@ -71,16 +64,16 @@ export class OrdersService {
     return orders;
   }
 
-  // async findOne(userId: number): Promise<Order> {
-  //   const order = await this.ordersRepository.findOne({
-  //     where: { user_id: userId },
-  //     relations: { items: true },
-  //   });
-  //   if (!order) {
-  //     throw new NotFoundException(`order with userID ${userId} not found`);
-  //   }
-  //   return order;
-  // }
+  async findOne(orderId: number): Promise<Order> {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+      relations: { items: true, address: true },
+    });
+    if (!order) {
+      throw new NotFoundException(`order with orderId ${orderId} not found`);
+    }
+    return order;
+  }
 
   async handleOrderStatusUpdated(
     id: number,
@@ -115,9 +108,5 @@ export class OrdersService {
     }
 
     return this.ordersRepository.save(order);
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} order`;
   }
 }
