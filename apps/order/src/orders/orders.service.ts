@@ -109,13 +109,22 @@ export class OrdersService {
 
       const restaurant = restaurantMap.get(restaurantId);
 
+      const cleanItems = items.map((item) => ({
+        dish_id: item.dish_id,
+        dish_name: item.dish_name,
+        dish_description: item.dish_description,
+        dish_image_url: item.dish_image_url,
+        price: item.price,
+        quantity: item.quantity,
+      }));
+
       return {
         restaurant_id: restaurantId,
         restaurant_name: restaurant?.name ?? "",
         restaurant_description: restaurant?.description ?? "",
         restaurant_cover_image_url: restaurant?.cover_image_url ?? "",
         restaurant_logo_url: restaurant?.logo_url ?? "",
-        items,
+        items: cleanItems,
         subtotal,
       };
     });
