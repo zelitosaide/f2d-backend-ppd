@@ -9,6 +9,8 @@ import { Repository } from "typeorm";
 import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
 import { OrderStatus, UpdateOrderStatusEventDto } from "@app/orders";
 import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
+import { GroupedItems } from "../carts/types/grouped-items.type";
+import { Dish } from "../carts/types/dish.type";
 // import { Cart } from "../carts/entities/cart.entity";
 // import CreateCartDto from "../carts/dto/create-cart.dto";
 
@@ -62,6 +64,63 @@ export class OrdersService {
       throw new NotFoundException(`orders with userID ${userId} not found`);
     }
     return orders;
+  }
+
+  async findOrdersDetails(userId: number): Promise<GroupedItems[]> {
+    const orders = await this.findMany(userId);
+
+    if (orders.length === 0) {
+      throw new NotFoundException(`orders with userID ${userId} not found`);
+    }
+
+    // 1. Flatten todos os items de todos os orders
+    const allItems = orders.flatMap((order) => order.items);
+
+    // 2. Agrupar por restaurant_id
+    const grouped = new Map<number, Dish[]>();
+
+    for (const item of allItems) {
+      const list = grouped.get(item.restaurant_id) || [];
+      list.push(item);
+      grouped.set(item.restaurant_id, list);
+    }
+
+    // 3. Buscar info dos restaurantes únicos
+    const restaurantIds = [...grouped.keys()];
+
+    const restaurantInfos = await Promise.all(
+      restaurantIds.map((id) =>
+        fetch(`http://restaurant:4003/restaurants/${id}`).then((res) =>
+          res.json(),
+        ),
+      ),
+    );
+
+    const restaurantMap = new Map(restaurantInfos.map((r) => [r.id, r]));
+
+    // 4. Montar resultado final
+    const result: GroupedItems[] = restaurantIds.map((restaurantId) => {
+      const items = grouped.get(restaurantId)!;
+
+      const subtotal = items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      );
+
+      const restaurant = restaurantMap.get(restaurantId);
+
+      return {
+        restaurant_id: restaurantId,
+        restaurant_name: restaurant?.name ?? "",
+        restaurant_description: restaurant?.description ?? "",
+        restaurant_cover_image_url: restaurant?.cover_image_url ?? "",
+        restaurant_logo_url: restaurant?.logo_url ?? "",
+        items,
+        subtotal,
+      };
+    });
+
+    return result;
   }
 
   async findOne(orderId: number): Promise<Order> {

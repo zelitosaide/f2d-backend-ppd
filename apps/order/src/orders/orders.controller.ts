@@ -34,4 +34,9 @@ export class OrdersController {
   findMany(@Param("userId") userId: number) {
     return this.ordersService.findMany(userId);
   }
+
+  @Get(":userId/details")
+  findOrdersDetails(@Param("userId") userId: number) {
+    return this.ordersService.findOrdersDetails(userId);
+  }
 }
