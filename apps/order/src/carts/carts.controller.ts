@@ -71,4 +71,9 @@ export class CartsController {
   findOne(@Param("userId") userId: number) {
     return this.cartsService.findOne(userId);
   }
+
+  @Get(":userId/details")
+  findCartDetails(@Param("userId") userId: number) {
+    return this.cartsService.findCartDetails(userId);
+  }
 }

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { request } from "node:http";
 import { OrdersService } from "../orders/orders.service";
 import { Cart } from "./entities/cart.entity";
 import { Repository } from "typeorm";
@@ -11,6 +12,7 @@ import { CheckoutDto } from "./dto/checkout-dto";
 import { OrderStatus } from "@app/orders";
 import { CreateOrderDto } from "../orders/dto/create-order.dto";
 import CreateCartDto from "./dto/create-cart.dto";
+import { GroupedItems } from "./types/grouped-items.type";
 
 @Injectable()
 export class CartsService {
@@ -123,7 +125,7 @@ export class CartsService {
 
   async checkout(checkoutDto: CheckoutDto) {
     const userId = checkoutDto.user_id;
-    const cart = await this.findOne(userId);
+    const cart = await this.findCartByUserId(userId);
     const { id, created_at, updated_at, ...cartWithoutDates } = cart;
     const cleanCart: CreateOrderDto = {
       ...cartWithoutDates,
@@ -155,6 +157,17 @@ export class CartsService {
     });
   }
 
+  private async findCartByUserId(userId: number): Promise<Cart> {
+    const cart = await this.cartsRepository.findOne({
+      where: { user_id: userId },
+      relations: { items: true },
+    });
+    if (!cart) {
+      throw new NotFoundException(`Cart with userID ${userId} not found`);
+    }
+    return cart;
+  }
+
   async findOne(userId: number): Promise<Cart> {
     const cart = await this.cartsRepository.findOne({
       where: { user_id: userId },
@@ -164,6 +177,54 @@ export class CartsService {
       throw new NotFoundException(`Cart with userID ${userId} not found`);
     }
     return cart;
+  }
+
+  async findCartDetails(userId: number): Promise<GroupedItems[]> {
+    const cart = await this.findCartByUserId(userId);
+
+    const restaurantIds = Array.from(
+      new Set(cart.items.map((item) => item.restaurant_id)),
+    );
+
+    const restaurantInfos = await Promise.all(
+      restaurantIds.map((restaurantId) =>
+        fetch(`http://restaurant:4003/restaurants/${restaurantId}`).then(
+          (res) => res.json(),
+        ),
+      ),
+    );
+
+    const restaurantMap = new Map(
+      restaurantInfos.map((restaurant) => [restaurant.id, restaurant]),
+    );
+
+    return cart.items.reduce((groups, item) => {
+      let group = groups.find((g) => g.restaurant_id === item.restaurant_id);
+      if (!group) {
+        const restaurant = restaurantMap.get(item.restaurant_id);
+        group = {
+          restaurant_id: item.restaurant_id,
+          restaurant_name: restaurant?.name ?? "",
+          restaurant_description: restaurant?.description ?? "",
+          restaurant_cover_image_url: restaurant?.cover_image_url ?? "",
+          restaurant_logo_url: restaurant?.logo_url ?? "",
+          items: [],
+          subtotal: 0,
+        };
+        groups.push(group);
+      }
+
+      group.items.push({
+        dish_id: item.dish_id,
+        dish_name: item.dish_name,
+        dish_description: item.dish_description,
+        dish_image_url: item.dish_image_url,
+        price: item.price,
+        quantity: item.quantity,
+      });
+      group.subtotal += item.price * item.quantity;
+      return groups;
+    }, [] as GroupedItems[]);
   }
 
   create(createCartDto: CreateCartDto) {
