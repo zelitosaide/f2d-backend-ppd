@@ -125,11 +125,14 @@ export class CartsService {
 
   async checkout(checkoutDto: CheckoutDto) {
     const userId = checkoutDto.user_id;
+    const restaurantId = checkoutDto.items[0].restaurant_id;
     const cart = await this.findCartByUserId(userId);
     const { id, created_at, updated_at, ...cartWithoutDates } = cart;
     const cleanCart: CreateOrderDto = {
       ...cartWithoutDates,
-      items: cart.items.map(({ id, created_at, cart, ...item }) => item),
+      items: cart.items
+        .filter((item) => item.restaurant_id === restaurantId)
+        .map(({ id, created_at, cart, ...item }) => item),
       status: OrderStatus.CREATED,
       notes: "Tenho Alergia",
       address: checkoutDto.address,
