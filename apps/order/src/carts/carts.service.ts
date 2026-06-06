@@ -137,7 +137,7 @@ export class CartsService {
       notes: "Tenho Alergia",
       address: checkoutDto.address,
     };
-    this.ordersService.create(cleanCart);
+    return this.ordersService.create(cleanCart);
   }
 
   async remove(cartId: number): Promise<void> {
