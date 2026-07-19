@@ -35,6 +35,11 @@ export class CartsController {
     return this.cartsService.findAllV2(paginationQuery);
   }
 
+  @Get("v2/:userId/many")
+  findManyV2(@Param("userId") userId: number) {
+    return this.cartsService.findManyV2(userId);
+  }
+
   @Get("v2/:userId")
   findOneV2(@Param("userId") userId: number) {
     return this.cartsService.findOneV2(userId);

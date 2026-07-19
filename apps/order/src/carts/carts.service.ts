@@ -77,6 +77,13 @@ export class CartsService {
     return await resDish.json();
   }
 
+  findManyV2(userId: number) {
+    return this.cartsV2Repository.find({
+      where: { user_id: userId, status: CartStatus.ACTIVE },
+      relations: { items: true },
+    });
+  }
+
   async createV2(createCartV2Dto: CreateCartV2Dto) {
     const {
       user_id: userId,
