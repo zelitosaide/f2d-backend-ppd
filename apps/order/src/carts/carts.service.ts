@@ -174,13 +174,20 @@ export class CartsService {
     return this.cartsV2Repository.save(cart);
   }
 
-  async addItemV2(userId: number, itemDto: AddItemV2Dto): Promise<CartV2> {
-    const cart = await this.cartsV2Repository.findOne({
-      where: { user_id: userId, status: CartStatus.ACTIVE },
+  async addItemV2(userId: number, itemDto: AddItemV2Dto): Promise<CartV2[]> {
+    const dish = await this.fetchDish(itemDto.restaurant_id, itemDto.dish_id);
+
+    let cart = await this.cartsV2Repository.findOne({
+      where: {
+        user_id: userId,
+        restaurant_id: itemDto.restaurant_id,
+        status: CartStatus.ACTIVE,
+      },
       relations: { items: true },
     });
+
     if (!cart) {
-      return this.createV2({
+      cart = await this.createV2({
         user_id: userId,
         restaurant_id: itemDto.restaurant_id,
         items: [
@@ -190,38 +197,43 @@ export class CartsService {
           } as CartItemV2Dto,
         ],
       });
-    }
-    const dish = await this.fetchDish(cart.restaurant_id, itemDto.dish_id);
-
-    const existingItem = cart.items.find((item) => item.dish_id === dish.id);
-
-    if (existingItem) {
-      existingItem.quantity += itemDto.quantity;
-      await this.cartItemsV2Repository.save(existingItem);
     } else {
-      const newItem = this.cartItemsV2Repository.create({
-        dish_id: dish.id,
-        dish_name: dish.name,
-        dish_description: dish.description,
-        dish_image_url: dish.image_url,
-        quantity: itemDto.quantity,
-        price: dish.price,
-      });
-      cart.items.push(newItem);
-      await this.cartItemsV2Repository.save(newItem);
+      const existingItem = cart.items.find((item) => item.dish_id === dish.id);
+
+      if (existingItem) {
+        existingItem.quantity += itemDto.quantity;
+        await this.cartItemsV2Repository.save(existingItem);
+      } else {
+        const newItem = this.cartItemsV2Repository.create({
+          dish_id: dish.id,
+          dish_name: dish.name,
+          dish_description: dish.description,
+          dish_image_url: dish.image_url,
+          quantity: itemDto.quantity,
+          price: dish.price,
+        });
+        cart.items.push(newItem);
+        await this.cartItemsV2Repository.save(newItem);
+      }
     }
+
     cart.subtotal = cart.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
-    return this.cartsV2Repository.save(cart);
+    await this.cartsV2Repository.save(cart);
+
+    return this.cartsV2Repository.find({
+      where: { user_id: userId, status: CartStatus.ACTIVE },
+      relations: { items: true },
+    });
   }
 
   async updateItemQuantityV2(
     cartId: number,
     dishId: number,
     updateItemQuantityV2Dto: UpdateItemQuantityV2Dto,
-  ): Promise<CartV2> {
+  ): Promise<CartV2[]> {
     const cart = await this.cartsV2Repository.findOne({
       where: { id: cartId },
     });
@@ -259,7 +271,11 @@ export class CartsService {
     await this.cartsV2Repository.save(cart);
 
     cart.items = items;
-    return cart;
+
+    return this.cartsV2Repository.find({
+      where: { user_id: cart.user_id, status: CartStatus.ACTIVE },
+      relations: { items: true },
+    });
   }
 
   async checkoutV2(cartId: number, checkoutV2Dto: CheckoutV2Dto) {
