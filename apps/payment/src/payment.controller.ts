@@ -1,27 +1,19 @@
-import { Controller, Get, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { PaymentService } from "./payment.service";
-import { EventPattern, Payload } from "@nestjs/microservices";
-import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
-import { UpdateOrderStatusEventDto } from "@app/orders";
+import { CreatePaymentDto } from "./dto/create-payment.dto";
+import { PaginationQueryDto } from "libs/common/src";
 
-@Controller()
+@Controller("payments/v2")
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Get()
-  getHello(): string {
-    return this.paymentService.getHello();
+  @Post()
+  create(@Body() createPaymentDto: CreatePaymentDto) {
+    return this.paymentService.create(createPaymentDto);
   }
 
-  @Get("payments")
+  @Get()
   findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.paymentService.findAll(paginationQuery);
-  }
-
-  @EventPattern("order.initiated")
-  handleOrderStatusUpdated(
-    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    this.paymentService.handleOrderStatusUpdated(updateOrderStatusEventDto);
   }
 }

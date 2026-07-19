@@ -9,15 +9,72 @@ import {
   Query,
 } from "@nestjs/common";
 import { CartsService } from "./carts.service";
-import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
-import { UpdateItemQuantityDto } from "./dto/update-item-quantity-dto";
-import { CartItemDto } from "./dto/cart-item-dto";
-import { CheckoutDto } from "./dto/checkout-dto";
+import { UpdateItemQuantityDto } from "./dto/update-item-quantity.dto";
+import { CartItemDto } from "./dto/cart-item.dto";
+import { CheckoutDto } from "./dto/checkout.dto";
 import CreateCartDto from "./dto/create-cart.dto";
+import CreateCartV2Dto from "./dto/v2/create-cart-v2.dto";
+import { UpdateCartStatusV2Dto } from "./dto/v2/update-cart-status-v2.dto";
+import { AddItemV2Dto } from "./dto/v2/add-item-v2.dto";
+import { UpdateItemQuantityV2Dto } from "./dto/v2/update-item-quantity-v2.dto";
+import { CheckoutV2Dto } from "./dto/v2/checkout-v2.dto";
+import { PaginationQueryDto } from "libs/common/src";
 
 @Controller("carts")
 export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
+
+  // V2 Endpoints --------------------------------------------------------------------------
+  @Post("v2")
+  createV2(@Body() createCartV2Dto: CreateCartV2Dto) {
+    return this.cartsService.createV2(createCartV2Dto);
+  }
+
+  @Get("v2")
+  findAllV2(@Query() paginationQuery: PaginationQueryDto) {
+    return this.cartsService.findAllV2(paginationQuery);
+  }
+
+  @Get("v2/:userId")
+  findOneV2(@Param("userId") userId: number) {
+    return this.cartsService.findOneV2(userId);
+  }
+
+  @Patch("v2/:cartId/status")
+  updateCartStatusV2(
+    @Param("cartId") cartId: number,
+    @Body() updateCartStatusV2Dto: UpdateCartStatusV2Dto,
+  ) {
+    return this.cartsService.updateCartStatusV2(cartId, updateCartStatusV2Dto);
+  }
+
+  @Post("v2/:userId/items/add")
+  addItemV2(@Param("userId") userId: number, @Body() itemDto: AddItemV2Dto) {
+    return this.cartsService.addItemV2(userId, itemDto);
+  }
+
+  @Patch("v2/:cartId/items/:dishId")
+  updateItemQuantityV2(
+    @Param("cartId") cartId: number,
+    @Param("dishId") dishId: number,
+    @Body() updateItemQuantityV2Dto: UpdateItemQuantityV2Dto,
+  ) {
+    return this.cartsService.updateItemQuantityV2(
+      cartId,
+      dishId,
+      updateItemQuantityV2Dto,
+    );
+  }
+
+  @Post("v2/:cartId/checkout")
+  checkoutV2(
+    @Param("cartId") cartId: number,
+    @Body() checkoutV2Dto: CheckoutV2Dto,
+  ) {
+    return this.cartsService.checkoutV2(cartId, checkoutV2Dto);
+  }
+
+  // -----------------------------------------------------------------------------------------
 
   @Post(":orderId/reorder")
   reorder(@Param("orderId") orderId: number) {

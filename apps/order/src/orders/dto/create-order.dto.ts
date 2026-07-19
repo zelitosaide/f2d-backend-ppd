@@ -9,8 +9,8 @@ import {
   ValidateNested,
 } from "class-validator";
 import { OrderItemDto } from "./order-item-dto";
-import { OrderStatus } from "@app/orders";
 import { Address } from "./address.dto";
+import { OrderStatus } from "@app/orders";
 
 export class CreateOrderDto {
   @IsInt()

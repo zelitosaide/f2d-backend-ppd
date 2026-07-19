@@ -1,5 +1,5 @@
-import { UpdateOrderStatusEventDto } from "@app/orders";
-import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
+import { EventDto } from "libs/common/src";
+import { EventType } from "libs/common/src/enums/event-type.enum";
 import { Logger } from "@nestjs/common";
 import {
   ConnectedSocket,
@@ -21,63 +21,31 @@ import { TrackingService } from "./tracking.service";
 })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly trackingService: TrackingService) {}
-
   private readonly logger = new Logger(EventsGateway.name);
 
   @WebSocketServer()
   server!: Server;
 
-  async handleOrderStatusUpdated(
-    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    if (updateOrderStatusEventDto.data.status === "CREATED") {
-      this.logger.debug("ORDER RECEIVED");
+  async updateOrderStatus(eventDto: EventDto) {
+    const statusEvents = {
+      CREATED: EventType.EMIT_ORDER_CREATED,
+      CANCELLED: EventType.EMIT_ORDER_CANCELLED,
+      PREPARING: EventType.EMIT_ORDER_PREPARING_STARTED,
+      READY: EventType.EMIT_ORDER_READY,
+      DRIVER_ACCEPTED: EventType.EMIT_ORDER_DRIVER_ACCEPTED,
+      DISPATCHED: EventType.EMIT_ORDER_DISPATCHED,
+      OUT_FOR_DELIVERY: EventType.EMIT_ORDER_OUT_FOR_DELIVERY,
+    };
 
-      if (updateOrderStatusEventDto.data.address) {
-        this.trackingService.registerDestination({
-          orderId: updateOrderStatusEventDto.data.orderId,
-          latitude: updateOrderStatusEventDto.data.address.latitude,
-          longitude: updateOrderStatusEventDto.data.address.longitude,
-        });
-      }
-      this.server.emit(OrderEventType.ORDER_CREATED, updateOrderStatusEventDto);
+    const event = statusEvents[eventDto.data.status];
+
+    if (event) {
+      this.server.emit(event, {
+        ...eventDto,
+        timestamp: new Date().toISOString(),
+        event_type: event,
+      });
     }
-
-    if (updateOrderStatusEventDto.data.status === "PREPARING") {
-      this.logger.debug("PREPARING YOUR ORDER...");
-      this.server.emit(
-        OrderEventType.ORDER_PREPARING_STARTED,
-        updateOrderStatusEventDto,
-      );
-    }
-
-    if (updateOrderStatusEventDto.data.status === "PICKING_UP") {
-      this.logger.debug("PICKING UP YOUR ORDER...");
-      this.server.emit(
-        OrderEventType.ORDER_PICKUP_STARTED,
-        updateOrderStatusEventDto,
-      );
-    }
-
-    if (updateOrderStatusEventDto.data.status === "OUT_FOR_DELIVERY") {
-      this.logger.debug("HEADING YOUR WAY...");
-      this.server.emit(
-        OrderEventType.ORDER_OUT_FOR_DELIVERY,
-        updateOrderStatusEventDto,
-      );
-    }
-
-    if (updateOrderStatusEventDto.data.status === "DELIVERED") {
-      this.logger.debug("DELIVERED");
-      this.server.emit(
-        OrderEventType.ORDER_DELIVERED,
-        updateOrderStatusEventDto,
-      );
-    }
-
-    updateOrderStatusEventDto;
-
-    this.logger.debug(updateOrderStatusEventDto);
   }
 
   @SubscribeMessage("driver.location.updated")
@@ -94,9 +62,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const nearbyPayload = await this.trackingService.processLocationUpdate(dto);
 
     if (nearbyPayload) {
-      this.server.emit(OrderEventType.ORDER_NEARBY, {
+      this.server.emit(EventType.ORDER_NEARBY, {
         ...nearbyPayload,
-        event: OrderEventType.ORDER_NEARBY,
+        event: EventType.ORDER_NEARBY,
         timestamp: new Date().toISOString(),
       });
     }

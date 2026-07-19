@@ -7,6 +7,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
 import { Item } from "./entities/item.entity";
 import { Address } from "./entities/address.entity";
+import { OrderV2 } from "./entities/v2/order-v2.entity";
+import { OrderItemV2 } from "./entities/v2/order-item-v2.entity";
+import { AddressV2 } from "./entities/v2/address-v2.entity";
+import { PaymentV2 } from "./entities/v2/payment-v2.entity";
 
 @Module({
   imports: [
@@ -19,7 +23,15 @@ import { Address } from "./entities/address.entity";
         },
       },
     ]),
-    TypeOrmModule.forFeature([Order, Item, Address]),
+    TypeOrmModule.forFeature([
+      Order,
+      Item,
+      Address,
+      OrderV2,
+      OrderItemV2,
+      AddressV2,
+      PaymentV2,
+    ]),
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

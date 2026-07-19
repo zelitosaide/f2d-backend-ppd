@@ -1,0 +1,25 @@
+export enum EventType {
+  ORDER_INITIATED = "order.initiated",
+  ORDER_CREATED = "order.created",
+  ORDER_PREPARING_STARTED = "order.preparing.started",
+  ORDER_READY = "order.ready",
+  DRIVER_ACCEPTED = "order.driver.accepted",
+  ORDER_DISPATCHED = "order.dispatched",
+  ORDER_OUT_FOR_DELIVERY = "order.out.for.delivery",
+  ORDER_NEARBY = "order.nearby",
+  ORDER_DELIVERED = "order.delivered",
+  ORDER_CANCELLED = "order.cancelled",
+  ORDER_FAILED = "order.failed",
+
+  // SocketEvent
+  EMIT_ORDER_CREATED = "emit.order.created",
+  EMIT_ORDER_CANCELLED = "emit.order.cancelled",
+  EMIT_ORDER_PREPARING_STARTED = "emit.order.preparing.started",
+  EMIT_ORDER_READY = "emit.order.ready",
+  EMIT_ORDER_DRIVER_ACCEPTED = "emit.order.driver.accepted",
+  EMIT_ORDER_DISPATCHED = "emit.order.dispatched",
+  EMIT_ORDER_OUT_FOR_DELIVERY = "emit.order.out.for.delivery",
+  EMIT_ORDER_NEARBY = "emit.order.nearby",
+  EMIT_ORDER_DELIVERED = "emit.order.delivered",
+  // EMIT_ORDER_FAILED = "emit.order.failed",
+}

@@ -4,10 +4,9 @@ import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Restaurant } from "./entities/restaurant.entity";
-import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { Dish } from "./entities/dish.entity";
-import { OrderStatus, UpdateOrderStatusEventDto, wait } from "@app/orders";
-import { OrderEventType } from "@app/orders/enum/order-event-type.enum";
+import { PaginationQueryDto, EventDto, wait } from "libs/common/src";
+import { EventType } from "libs/common/src/enums/event-type.enum";
 import { ClientProxy } from "@nestjs/microservices";
 import { NATS_CLIENT } from "../constants";
 
@@ -18,66 +17,47 @@ export class RestaurantsService {
     private readonly restaurantsRepository: Repository<Restaurant>,
     @InjectRepository(Dish)
     private readonly dishesRepository: Repository<Dish>,
-    @Inject(NATS_CLIENT)
-    private readonly natsClient: ClientProxy,
+    // @Inject(NATS_CLIENT)
+    // private readonly natsClient: ClientProxy,
+    // private readonly processedEvents: ProcessedEventRepository,
   ) {}
 
-  async updateOrderStatus(
-    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    if (
-      updateOrderStatusEventDto.event === OrderEventType.ORDER_PICKUP_STARTED
-    ) {
-      this.natsClient.emit(OrderEventType.ORDER_PICKUP_STARTED, {
-        ...updateOrderStatusEventDto,
-        timestamp: new Date().toISOString(),
-      });
+  private readonly logger = new Logger(RestaurantsService.name);
+
+  async updateOrderStatus(updateOrderStatusEventDto: EventDto) {
+    if (updateOrderStatusEventDto.event_type === EventType.ORDER_DISPATCHED) {
+      // this.natsClient.emit(EventType.ORDER_PICKUP_STARTED, {
+      //   ...updateOrderStatusEventDto,
+      //   timestamp: new Date().toISOString(),
+      // });
     }
 
     if (
-      updateOrderStatusEventDto.event === OrderEventType.ORDER_OUT_FOR_DELIVERY
+      updateOrderStatusEventDto.event_type === EventType.ORDER_OUT_FOR_DELIVERY
     ) {
-      this.natsClient.emit(OrderEventType.ORDER_OUT_FOR_DELIVERY, {
-        ...updateOrderStatusEventDto,
-        timestamp: new Date().toISOString(),
-      });
+      // this.natsClient.emit(EventType.ORDER_OUT_FOR_DELIVERY, {
+      //   ...updateOrderStatusEventDto,
+      //   timestamp: new Date().toISOString(),
+      // });
     }
 
-    if (updateOrderStatusEventDto.event === OrderEventType.ORDER_NEARBY) {
+    if (updateOrderStatusEventDto.event_type === EventType.ORDER_NEARBY) {
       // ETA < 2 minutos
-      this.natsClient.emit(OrderEventType.ORDER_NEARBY, {
-        ...updateOrderStatusEventDto,
-        timestamp: new Date().toISOString(),
-      });
+      // this.natsClient.emit(EventType.ORDER_NEARBY, {
+      //   ...updateOrderStatusEventDto,
+      //   timestamp: new Date().toISOString(),
+      // });
     }
 
-    if (updateOrderStatusEventDto.event === OrderEventType.ORDER_DELIVERED) {
+    if (updateOrderStatusEventDto.event_type === EventType.ORDER_DELIVERED) {
       // Check PIN
-      this.natsClient.emit(OrderEventType.ORDER_DELIVERED, {
-        ...updateOrderStatusEventDto,
-        timestamp: new Date().toISOString(),
-      });
+      // this.natsClient.emit(EventType.ORDER_DELIVERED, {
+      //   ...updateOrderStatusEventDto,
+      //   timestamp: new Date().toISOString(),
+      // });
     }
 
     return;
-  }
-
-  async handleOrderStatusUpdated(
-    updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    await wait(5000);
-
-    const event: UpdateOrderStatusEventDto = {
-      event: OrderEventType.ORDER_PREPARING_STARTED,
-      timestamp: new Date().toISOString(),
-      data: {
-        orderId: updateOrderStatusEventDto.data.orderId,
-        status: OrderStatus.PREPARING,
-        amount: updateOrderStatusEventDto.data.amount,
-        userId: updateOrderStatusEventDto.data.userId,
-      },
-    };
-    this.natsClient.emit(OrderEventType.ORDER_PREPARING_STARTED, event);
   }
 
   create(createRestaurantDto: CreateRestaurantDto) {

@@ -3,6 +3,7 @@ import { RestaurantController } from "./restaurant.controller";
 import { RestaurantService } from "./restaurant.service";
 import { RestaurantsModule } from "./restaurants/restaurants.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
       synchronize: true,
     }),
     RestaurantsModule,
+    OrdersModule,
   ],
   controllers: [RestaurantController],
   providers: [RestaurantService],

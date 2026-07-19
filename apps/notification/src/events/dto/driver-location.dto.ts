@@ -54,7 +54,7 @@ export interface OrderDestination {
 //   customerId: number;
 // }
 
-export enum OrderStatus {
+enum OrderStatus {
   PICKED_UP = "PICKED_UP",
   IN_TRANSIT = "IN_TRANSIT",
   NEARBY = "NEARBY",

@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsArray, IsInt, IsNumber, ValidateNested } from "class-validator";
-import { CartItemDto } from "./cart-item-dto";
+import { CartItemDto } from "./cart-item.dto";
 
 export default class CreateCartDto {
   @IsInt()

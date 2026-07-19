@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "./entities/user.entity";
-import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { PaginationQueryDto } from "libs/common/src";
 
 // https://learn.nestjs.com/courses/591712/lectures/23193765
 

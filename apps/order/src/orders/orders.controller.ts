@@ -1,42 +1,48 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
 import { OrdersService } from "./orders.service";
-import { PaginationQueryDto } from "./common/dto/pagination-query.dto";
-import { UpdateOrderStatusEventDto } from "@app/orders";
+import { PaginationQueryDto, EventDto } from "libs/common/src";
+import { CreateOrderV2Dto } from "./dto/v2/create-order-v2.dto";
+import { EventType } from "@app/orders/enums/event-type.enum";
 
 @Controller("orders")
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  // V2 ----------------------------------------------------------------------------------------------
+  @Get("v2")
+  findAllV2(@Query() paginationQuery: PaginationQueryDto) {
+    return this.ordersService.findAllV2(paginationQuery);
+  }
+
+  @Get("v2/:userId")
+  findManyV2(@Param("userId") userId: number) {
+    return this.ordersService.findManyV2(userId);
+  }
+
+  @Post("v2")
+  createv2(@Body() createOrderV2Dto: CreateOrderV2Dto) {
+    return this.ordersService.createV2(createOrderV2Dto);
+  }
+
   @EventPattern([
-    "payment.processed",
-    "order.preparing.started",
-    "order.pickup.started",
-    "order.out.for.delivery",
+    EventType.ORDER_CANCELLED,
+    EventType.ORDER_PREPARING_STARTED,
+    EventType.ORDER_READY,
+    EventType.DRIVER_ACCEPTED,
+    EventType.ORDER_DISPATCHED,
+    EventType.ORDER_OUT_FOR_DELIVERY,
     "order.nearby",
     "order.delivered",
   ])
-  handleOrderStatusUpdated(
-    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    this.ordersService.handleOrderStatusUpdated(
-      updateOrderStatusEventDto.data.orderId,
-      updateOrderStatusEventDto,
-    );
+  updateOrderStatusV2(@Payload() eventDto: EventDto) {
+    this.ordersService.updateOrderStatusV2(eventDto.data.order_id, eventDto);
   }
 
-  @Get()
-  findAll(@Query() paginationQuery: PaginationQueryDto) {
-    return this.ordersService.findAll(paginationQuery);
-  }
+  // -------------------------------------------------------------------------------------------------
 
-  @Get(":userId")
-  findMany(@Param("userId") userId: number) {
-    return this.ordersService.findMany(userId);
-  }
-
-  @Get(":userId/details")
-  findOrdersDetails(@Param("userId") userId: number) {
-    return this.ordersService.findOrdersDetails(userId);
-  }
+  // @Get(":userId/details")
+  // findOrdersDetails(@Param("userId") userId: number) {
+  //   return this.ordersService.findOrdersDetails(userId);
+  // }
 }

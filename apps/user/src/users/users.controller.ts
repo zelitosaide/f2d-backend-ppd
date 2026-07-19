@@ -11,7 +11,7 @@ import {
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
+import { PaginationQueryDto } from "libs/common/src";
 
 // https://learn.nestjs.com/courses/591712/lectures/23193765
 

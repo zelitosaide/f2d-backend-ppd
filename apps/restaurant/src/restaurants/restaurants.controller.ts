@@ -3,20 +3,11 @@ import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
 import { RestaurantsService } from "./restaurants.service";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { UpdateRestaurantDto } from "./dto/update-restaurant.dto";
-import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
-import { UpdateOrderStatusEventDto } from "@app/orders";
+import { PaginationQueryDto, EventDto } from "libs/common/src";
 
 @Controller("restaurants")
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
-
-  @EventPattern("order.created")
-  handleOrderStatusUpdated(
-    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    // this.ordersService.update(updateOrderDto.id, updateOrderDto);
-    this.restaurantsService.handleOrderStatusUpdated(updateOrderStatusEventDto);
-  }
 
   @Post()
   create(@Body() createRestaurantDto: CreateRestaurantDto) {
@@ -24,10 +15,8 @@ export class RestaurantsController {
   }
 
   @Post("update-order-status")
-  updateOrderStatus(
-    @Body() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    return this.restaurantsService.updateOrderStatus(updateOrderStatusEventDto);
+  updateOrderStatus(@Body() EventDto: EventDto) {
+    return this.restaurantsService.updateOrderStatus(EventDto);
   }
 
   @Get()

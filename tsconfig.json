@@ -22,12 +22,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@app/orders": [
-        "libs/orders/src"
-      ],
-      "@app/orders/*": [
-        "libs/orders/src/*"
-      ]
+      "@app/orders": ["libs/common/src"],
+      "@app/orders/*": ["libs/common/src/*"]
     }
   }
 }

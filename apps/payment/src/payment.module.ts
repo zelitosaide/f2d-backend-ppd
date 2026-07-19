@@ -4,6 +4,7 @@ import { PaymentService } from "./payment.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { NATS_CLIENT } from "./constants";
+import { Payment } from "./entities/payment.entity";
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { NATS_CLIENT } from "./constants";
       autoLoadEntities: true,
       synchronize: true,
     }),
-
+    TypeOrmModule.forFeature([Payment]),
     ClientsModule.register([
       {
         name: NATS_CLIENT,

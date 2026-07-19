@@ -1,23 +1,25 @@
-import { Controller, Logger } from "@nestjs/common";
+import { Controller } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
 import { EventsGateway } from "./events/events.gateway";
-import { UpdateOrderStatusEventDto } from "@app/orders";
+import { EventDto } from "libs/common/src";
+import { EventType } from "@app/orders/enums/event-type.enum";
 
 @Controller()
 export class NotificationController {
   constructor(private readonly eventsGateway: EventsGateway) {}
 
   @EventPattern([
-    "order.created",
-    "order.preparing.started",
-    "order.pickup.started",
-    "order.out.for.delivery",
+    EventType.ORDER_CREATED,
+    EventType.ORDER_CANCELLED,
+    EventType.ORDER_PREPARING_STARTED,
+    EventType.ORDER_READY,
+    EventType.DRIVER_ACCEPTED,
+    EventType.ORDER_DISPATCHED,
+    EventType.ORDER_OUT_FOR_DELIVERY,
     "order.nearby",
     "order.delivered",
   ])
-  handleOrderStatusUpdated(
-    @Payload() updateOrderStatusEventDto: UpdateOrderStatusEventDto,
-  ) {
-    this.eventsGateway.handleOrderStatusUpdated(updateOrderStatusEventDto);
+  handleOrderStatusUpdated(@Payload() eventDto: EventDto) {
+    this.eventsGateway.updateOrderStatus(eventDto);
   }
 }
